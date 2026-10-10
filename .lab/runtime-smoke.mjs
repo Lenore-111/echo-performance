@@ -13,7 +13,10 @@ page.on('pageerror', e => { errors.push(e.stack || String(e)); console.log(`PAGE
 const check = (name, actual, expected = true) => { assert.deepEqual(actual, expected, name); checks.push(name); console.log(`PASS ${name}`); };
 const settle = () => page.waitForFunction(() => {
     const stats = EchoPerformance.stats();
-    return stats.detachedMessageShells >= 50 && stats.liveMessageShells <= 100;
+    const chatLength = SillyTavern.getContext().chat.length;
+    return stats.enabled === true
+        && stats.generating === false
+        && stats.liveMessageShells + stats.detachedMessageShells === chatLength;
 });
 try {
     await page.goto(process.env.LAB_ST_URL || 'http://127.0.0.1:8039');
