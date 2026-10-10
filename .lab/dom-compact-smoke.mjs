@@ -128,34 +128,70 @@ const testReasoning = async target => page.evaluate(async target => {
 }, target);
 
 const testJump = async target => page.evaluate(async target => {
-    const parser = (await import('/scripts/slash-commands.js')).parser;
-    const before = document.querySelector('#chat').scrollTop;
+    const { executeSlashCommands } = await import('/scripts/slash-commands.js');
+    const root = document.querySelector('#chat');
+    const before = root.scrollTop;
     const started = performance.now();
-    await parser.executeCommand(`/chat-jump ${target}`);
+    await executeSlashCommands(`/chat-jump ${target}`);
     await new Promise(resolve => setTimeout(resolve, 800));
     const shell = document.querySelector(`#chat > .mes[mesid="${target}"]`);
-    const root = document.querySelector('#chat');
     if (!(shell instanceof HTMLElement)) return { ok: false, reason: 'target missing', ms: performance.now() - started };
     const sr = shell.getBoundingClientRect();
     const rr = root.getBoundingClientRect();
     return { ok: sr.bottom > rr.top && sr.top < rr.bottom, before, after: root.scrollTop, ms: performance.now() - started };
 }, target);
 
-const testRegen = async () => page.evaluate(async () => {
-    const s = await import('/script.js');
-    const beforeLength = s.chat.length;
-    const beforeLastId = beforeLength - 1;
-    const beforeStats = EchoPerformance.stats();
-    // Only verify lifecycle and mounted state here. The full acceptance suite
-    // supplies the deterministic generation backend before calling Generate.
-    const last = EchoPerformance.ensureMessageMounted(beforeLastId, 'smoke-regen-preflight');
-    return {
-        ok: last instanceof HTMLElement && last.isConnected && beforeStats.enabled,
-        beforeLength,
-        beforeLastId,
-        beforeStats,
-    };
-});
+const testRegen = async () => {
+    const fixture = await page.evaluate(() => {
+        const c = SillyTavern.getContext();
+        const last = c.chat.at(-1);
+        return { length: c.chat.length, mes: last?.mes ?? '', reasoning: last?.extra?.reasoning ?? '' };
+    });
+    let requests = 0;
+    await page.route('**/api/backends/chat-completions/generate', async route => {
+        requests += 1;
+        await route.fulfill({
+            status: 200,
+            contentType: 'application/json',
+            body: JSON.stringify({ choices: [{ message: { role: 'assistant', content: fixture.mes, reasoning_content: fixture.reasoning }, finish_reason: 'stop' }] }),
+        });
+    });
+    try {
+        return await page.evaluate(async fixture => {
+            const s = await import('/script.js');
+            const { oai_settings } = await import('/scripts/openai.js');
+            const context = SillyTavern.getContext();
+            window.echoCompactGenerationStates = [];
+            const started = (_type, _options, dryRun) => {
+                if (!dryRun) window.echoCompactGenerationStates.push({ event: 'started', stats: EchoPerformance.stats() });
+            };
+            const ended = () => window.echoCompactGenerationStates.push({ event: 'ended', stats: EchoPerformance.stats() });
+            context.eventSource.on(context.eventTypes.GENERATION_STARTED, started);
+            context.eventSource.on(context.eventTypes.GENERATION_ENDED, ended);
+            s.changeMainAPI('openai');
+            oai_settings.chat_completion_source = 'custom';
+            oai_settings.custom_url = 'http://127.0.0.1:8041/v1';
+            oai_settings.custom_model = 'echo-deterministic';
+            oai_settings.stream_openai = false;
+            s.setOnlineStatus('echo-local');
+            const before = EchoPerformance.stats();
+            await s.Generate('regenerate');
+            await new Promise(resolve => setTimeout(resolve, 500));
+            const after = EchoPerformance.stats();
+            context.eventSource.removeListener(context.eventTypes.GENERATION_STARTED, started);
+            context.eventSource.removeListener(context.eventTypes.GENERATION_ENDED, ended);
+            return {
+                ok: s.chat.length === fixture.length && !after.generating,
+                before,
+                after,
+                lifecycle: window.echoCompactGenerationStates,
+                finalLength: s.chat.length,
+            };
+        }, fixture);
+    } finally {
+        await page.unroute('**/api/backends/chat-completions/generate');
+    }
+};
 
 try {
     await page.goto('http://127.0.0.1:8039');
@@ -192,9 +228,9 @@ try {
                 result.beforeJump = await domSnapshot();
                 result.jump = await testJump(target);
                 result.afterJump = await domSnapshot();
-                result.regenPreflight = await testRegen();
+                result.regen = await testRegen();
 
-                const samples = result.afterJump.stats.restoreSamples ?? [];
+                const samples = EchoPerformance ? result.afterJump.stats.restoreSamples ?? [] : [];
                 result.maxRestoreDriftPx = samples.length ? Math.max(...samples.map(sample => Math.abs(sample.driftPx ?? 0))) : null;
                 result.maxRestoreMs = samples.length ? Math.max(...samples.map(sample => sample.durationMs ?? 0)) : null;
             }
@@ -206,6 +242,8 @@ try {
 
     const off1000 = rows.find(row => row.count === 1000 && !row.enabled);
     const on1000 = rows.find(row => row.count === 1000 && row.enabled);
+    const generationFreezeOk = on1000?.regen?.lifecycle?.some(x => x.event === 'started' && x.stats.generating)
+        && on1000?.regen?.lifecycle?.some(x => x.event === 'ended' && !x.stats.generating);
     const verdict = !off1000 || !on1000 ? 'NOT VERIFIED'
         : on1000.initial.liveMes <= 180
             && on1000.initial.chatElements < off1000.initial.chatElements * 0.45
@@ -214,6 +252,8 @@ try {
             && on1000.edit?.ok
             && on1000.reasoning?.ok
             && on1000.jump?.ok
+            && on1000.regen?.ok
+            && generationFreezeOk
             && (on1000.swipe?.supported === false || on1000.swipe?.ok)
             && (on1000.maxRestoreDriftPx ?? Infinity) <= 8
             ? 'PASS'
