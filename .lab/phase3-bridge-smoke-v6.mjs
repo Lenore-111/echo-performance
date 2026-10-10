@@ -287,29 +287,116 @@ try {
 
     await collectCase('cold-reasoning', async () => {
         const id = targets.reasoning;
-        const result = await page.evaluate(async id => {
+        const before = await bridgeEvidence(id);
+        const expand = await page.evaluate(async id => {
             const beforeLive = Boolean(document.querySelector(`#chat > .mes[mesid="${id}"]`));
             window.p3refs.reasoning.reasoning?.click();
             await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
             const shell = document.querySelector(`#chat > .mes[mesid="${id}"]`);
             const details = shell?.querySelector('details');
-            const opened = details instanceof HTMLDetailsElement ? details.open : null;
-            const contentLength = shell?.querySelector('.mes_reasoning')?.textContent?.length ?? 0;
-            shell?.querySelector('.mes_reasoning_header, .mes_reasoning_header_title')?.click();
-            await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
-            const closed = details instanceof HTMLDetailsElement ? details.open === false : false;
-            return { beforeLive, mountedDuring: shell instanceof HTMLElement, opened, closed, contentLength };
+            return {
+                beforeLive,
+                mountedDuring: shell instanceof HTMLElement,
+                opened: details instanceof HTMLDetailsElement ? details.open : null,
+                contentLength: shell?.querySelector('.mes_reasoning')?.textContent?.length ?? 0,
+            };
         }, id);
-        const duplicates = await duplicateMesIds();
-        const release = await leaveTargetAndObserve(id);
+        const expandDuplicates = await duplicateMesIds();
+        const expandRelease = await leaveTargetAndObserve(id);
+        const expandTrace = expandRelease.trace.slice(before.trace.length);
+        const expandGate = traceGate(expandTrace);
+        const expandColdBridge = expandTrace.some(entry => entry.event === 'operation-started'
+            && String(entry.mountReason ?? '').startsWith('cold-dom-interaction:'));
+        const expandRetainedState = await page.evaluate(() => ({
+            open: window.p3refs.reasoning.reasoning?.closest('details')?.open ?? null,
+            connected: window.p3refs.reasoning.reasoning?.isConnected ?? null,
+        }));
+        const expandEvidence = {
+            ...expand,
+            duplicates: expandDuplicates,
+            release: expandRelease,
+            trace: expandTrace,
+            traceGate: expandGate,
+            coldBridge: expandColdBridge,
+            retainedStateAfterDetach: expandRetainedState,
+        };
+
+        // Never collapse a still-mounted target. If expand did not recompact, preserve the
+        // blocked trace as evidence and fail here rather than manually ensuring/mounting it.
+        if (!expandRelease.detached || !expandRelease.detachedState) {
+            return {
+                pass: false,
+                error: 'expand-cycle-did-not-detach',
+                trace: expandTrace,
+                evidence: {
+                    expand: expandEvidence,
+                    collapse: { skipped: true, reason: 'expand-not-detached' },
+                },
+            };
+        }
+
+        const collapseBefore = await bridgeEvidence(id);
+        const collapse = await page.evaluate(async id => {
+            const beforeLive = Boolean(document.querySelector(`#chat > .mes[mesid="${id}"]`));
+            // Same retained native control, clicked while its shell is detached. The shell's
+            // capture listener must invoke the cold bridge; no bridge.ensure() is used here.
+            window.p3refs.reasoning.reasoning?.click();
+            await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+            const shell = document.querySelector(`#chat > .mes[mesid="${id}"]`);
+            const details = shell?.querySelector('details');
+            return {
+                beforeLive,
+                mountedDuring: shell instanceof HTMLElement,
+                closed: details instanceof HTMLDetailsElement ? details.open === false : false,
+            };
+        }, id);
+        const collapseDuplicates = await duplicateMesIds();
+        const collapseRelease = await leaveTargetAndObserve(id);
+        const collapseTrace = collapseRelease.trace.slice(collapseBefore.trace.length);
+        const collapseGate = traceGate(collapseTrace);
+        const collapseColdBridge = collapseTrace.some(entry => entry.event === 'operation-started'
+            && String(entry.mountReason ?? '').startsWith('cold-dom-interaction:'));
+        const collapseRetainedState = await page.evaluate(() => ({
+            open: window.p3refs.reasoning.reasoning?.closest('details')?.open ?? null,
+            connected: window.p3refs.reasoning.reasoning?.isConnected ?? null,
+        }));
+        const collapseEvidence = {
+            ...collapse,
+            duplicates: collapseDuplicates,
+            release: collapseRelease,
+            trace: collapseTrace,
+            traceGate: collapseGate,
+            coldBridge: collapseColdBridge,
+            retainedStateAfterDetach: collapseRetainedState,
+        };
+
         return {
-            ...result,
-            duplicates,
-            trace: release.trace,
+            beforeLive: expand.beforeLive,
+            opened: expand.opened,
+            closed: collapse.closed,
+            contentLength: expand.contentLength,
+            trace: [...expandTrace, ...collapseTrace],
             error: null,
-            evidence: release,
-            pass: !result.beforeLive && result.mountedDuring && result.opened === true && result.closed === true
-                && result.contentLength > 0 && duplicates.length === 0 && release.detached && release.detachedState && release.traceGate.pass,
+            evidence: { expand: expandEvidence, collapse: collapseEvidence },
+            pass: !expand.beforeLive
+                && expand.mountedDuring
+                && expand.opened === true
+                && expand.contentLength > 0
+                && expandDuplicates.length === 0
+                && expandColdBridge
+                && expandGate.pass
+                && expandRelease.detached
+                && expandRelease.detachedState
+                && expandRetainedState.open === true
+                && collapse.beforeLive === false
+                && collapse.mountedDuring
+                && collapse.closed === true
+                && collapseDuplicates.length === 0
+                && collapseColdBridge
+                && collapseGate.pass
+                && collapseRelease.detached
+                && collapseRelease.detachedState
+                && collapseRetainedState.open === false,
         };
     });
 
