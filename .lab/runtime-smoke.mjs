@@ -109,14 +109,14 @@ try {
     await page.locator('#chat>.mes[mesid="12"] .mes_edit_cancel').click();
     check('native edit cancel retains original', await page.evaluate(() => !SillyTavern.getContext().chat[12].mes.includes('Unsaved edit')));
     await page.evaluate(async () => {
-        const s = await import('/script.js');
+        const context = SillyTavern.getContext();
         const { SWIPE_DIRECTION, SWIPE_SOURCE } = await import('/scripts/constants.js');
-        await s.swipe(null, SWIPE_DIRECTION.RIGHT, { source: SWIPE_SOURCE.SWIPE_PICKER, forceMesId: 11, forceSwipeId: 1 });
+        await context.swipe.to(null, SWIPE_DIRECTION.RIGHT, { source: SWIPE_SOURCE.SWIPE_PICKER, forceMesId: 11, forceSwipeId: 1, forceDuration: 0 });
     });
     check('native historical swipe selects alternate without deleting history', await page.evaluate(() => { const m = SillyTavern.getContext().chat[11]; return m.swipe_id === 1 && m.mes.startsWith('Alternate message 11') && m.swipes.length === 2; }));
     await page.evaluate(async () => {
-        const s = await import('/script.js'); const { SWIPE_DIRECTION, SWIPE_SOURCE } = await import('/scripts/constants.js');
-        await s.swipe(null, SWIPE_DIRECTION.LEFT, { source: SWIPE_SOURCE.SWIPE_PICKER, forceMesId: 11, forceSwipeId: 0 });
+        const context = SillyTavern.getContext(); const { SWIPE_DIRECTION, SWIPE_SOURCE } = await import('/scripts/constants.js');
+        await context.swipe.to(null, SWIPE_DIRECTION.LEFT, { source: SWIPE_SOURCE.SWIPE_PICKER, forceMesId: 11, forceSwipeId: 0, forceDuration: 0 });
     });
     check('swipe back restores reasoning and original history', await page.evaluate(() => { const m = SillyTavern.getContext().chat[11]; return m.swipe_id === 0 && m.mes.startsWith('Message 11:') && m.extra.reasoning.length > 0 && m.swipes.length === 2; }));
     const reasoningSetup = await page.evaluate(() => {
@@ -132,8 +132,9 @@ try {
         const chat = document.querySelector('#chat');
         chat.scrollTo({ top: chat.scrollHeight, behavior: 'auto' });
         chat.dispatchEvent(new Event('scroll'));
-        return { traceLength: trace.length, redispatches };
+        return { traceLength: trace.length, redispatches, live: true, echo: EchoPerformance.stats(), bridge: bridge?.stats?.() ?? null, traceTail: trace.slice(-20) };
     });
+    evidence.reasoningSetup = reasoningSetup;
     await page.waitForFunction(() => !document.querySelector('#chat>.mes[mesid="11"]'), null, { timeout: 7000 });
     check('historical reasoning target is cold before expand', await page.evaluate(() => !document.querySelector('#chat>.mes[mesid="11"]')));
     await page.evaluate(() => window.echoReasoningControl.click());
