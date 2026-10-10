@@ -58,7 +58,14 @@ try {
     check('scroll height preserved within 2px', await page.evaluate(() => Math.abs(document.querySelector('#chat').scrollHeight - window.echoBeforeHeight) <= 2));
     check('recent 40 messages remain fully present and unconstrained', await page.evaluate(() => [...document.querySelectorAll('#chat>.mes')].slice(-40).every(m => m.querySelector('.mes_text').textContent.length > 0 && !m.style.contentVisibility)));
     await page.evaluate(() => EchoPerformance.setEnabled(false));
-    check('disable restores HTML and original node identity', await page.evaluate(() => { const t = document.querySelector('#chat>.mes[mesid="0"] .mes_text'); return t.innerHTML === window.echoBeforeHTML && t.firstChild === window.echoFirstChild && EchoPerformance.stats().deferredMessages === 0; }));
+    check('disable restores HTML and original node identity', await page.evaluate(() => {
+        const t = document.querySelector('#chat>.mes[mesid="0"] .mes_text');
+        const stats = EchoPerformance.stats();
+        return t.innerHTML === window.echoBeforeHTML
+            && t.firstChild === window.echoFirstChild
+            && stats.detachedMessageShells === 0
+            && stats.liveMessageShells === SillyTavern.getContext().chat.length;
+    }));
     await page.evaluate(() => EchoPerformance.setEnabled(true)); await settle();
     // A third-party consumer receives native events only after parked DOM restores.
     check('native event consumer sees complete DOM without layout constraints', await page.evaluate(async () => {
