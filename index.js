@@ -1,5 +1,6 @@
 import { DomCompactor } from './src/dom-compact.js';
 import { installNativeColdBridge } from './src/native-bridge.js';
+import { installLightweightProfiler } from './src/profiler.js';
 
 function start() {
     if (window.EchoPerformance) return;
@@ -12,6 +13,7 @@ function start() {
     const settings = context.extensionSettings.echo_performance ??= { enabled: false };
     const viewport = new DomCompactor(root, getContext);
     const bridge = installNativeColdBridge(viewport, nativeGetContext);
+    const profiler = installLightweightProfiler({ viewport, bridge, root });
     const { eventSource, eventTypes } = context;
 
     const eventNames = [
@@ -80,6 +82,8 @@ function start() {
     checkbox.disabled = !supported;
     checkbox.checked = Boolean(settings.enabled) && supported;
 
+    let statusDirty = true;
+
     const setEnabled = (enabled, persist = false) => {
         viewport.setEnabled(enabled);
         bridge.attachCurrent();
@@ -92,8 +96,13 @@ function start() {
     };
 
     function showStatus() {
+        // Status is diagnostic UI, not part of the runtime hot path. viewport.stats()
+        // intentionally performs DOM scans, so only run it on explicit settings UI
+        // interactions instead of every compact/restore state transition.
+        profiler.markStatusRefresh({ domScan: true });
         const stats = viewport.stats();
         const status = panel.querySelector('[data-echo-status]');
+        statusDirty = false;
         if (!supported) {
             status.textContent = '当前浏览器缺少 DOM Compact 所需能力。';
             return;
@@ -113,7 +122,14 @@ function start() {
         status.textContent = `live ${stats.liveMessageShells} 楼 / detached ${stats.detachedMessageShells} 楼；${stats.detachedChunks} 个冷 chunk。`;
     }
 
-    viewport.onStateChange = showStatus;
+    viewport.onStateChange = () => {
+        statusDirty = true;
+    };
+    panel.querySelector('.inline-drawer-toggle')?.addEventListener('click', () => {
+        queueMicrotask(() => {
+            if (statusDirty) showStatus();
+        });
+    });
     checkbox.addEventListener('change', () => setEnabled(checkbox.checked, true));
     panel.querySelector('[data-echo-restore]').addEventListener('click', () => {
         viewport.pause();
@@ -137,6 +153,9 @@ function start() {
             showStatus();
         },
         stats: () => ({ ...viewport.stats(), bridge: bridge.stats() }),
+        profile: options => profiler.snapshot(options),
+        profileReset: () => profiler.reset(),
+        profileExpensive: enabled => profiler.setExpensive(enabled),
         ensureMessageMounted: (mesId, reason = 'external-request') => viewport.ensureMessageMounted(mesId, { reason }),
         pin: shell => viewport.pin(shell),
     });
