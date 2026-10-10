@@ -22,7 +22,7 @@ permissions:
 
 env:
   ST_COMMIT: 8172dcd0ee672d3cd9a5e5f7af134f91a45cd2b8
-  WB_COMMIT: f9babfa0ee0bd3003d3529fd171b83103cfee4c1
+  WB_COMMIT: 8ef53819a2e21743691608cf7712056b25b8cda4
   LAB_ST_URL: http://127.0.0.1:8039/
   LAB_CHROME: /usr/bin/google-chrome
 
@@ -40,7 +40,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: h675786161-prog/world-backstage
-          ref: f9babfa0ee0bd3003d3529fd171b83103cfee4c1
+          ref: 8ef53819a2e21743691608cf7712056b25b8cda4
           path: world-backstage
 
       - uses: actions/setup-node@v4
@@ -221,7 +221,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: h675786161-prog/world-backstage
-          ref: f9babfa0ee0bd3003d3529fd171b83103cfee4c1
+          ref: 8ef53819a2e21743691608cf7712056b25b8cda4
           path: world-backstage
 
       - uses: actions/setup-node@v4
