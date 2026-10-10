@@ -67,38 +67,47 @@ async function writeDiagnostic(error = null) {
     return diagnostic;
 }
 
+function appReadyPredicate() {
+    const context = window.SillyTavern?.getContext?.();
+    if (!context?.eventSource?.autoFireLastArgs) return false;
+    const appReadyType = context.eventTypes?.APP_READY;
+    return Boolean((appReadyType && context.eventSource.autoFireLastArgs.has(appReadyType))
+        || context.eventSource.autoFireLastArgs.has('app_ready'));
+}
+
 try {
     stage = 'navigate';
     await page.goto(process.env.LAB_ST_URL || 'http://127.0.0.1:8039/', { waitUntil: 'domcontentloaded' });
 
-    stage = 'wait-shell-or-onboarding';
+    stage = 'wait-shell';
+    await page.waitForFunction(() => Boolean(window.SillyTavern?.getContext && document.querySelector('#send_textarea')));
+
+    // The clean-runtime onboarding dialog is created after the basic chat shell.
+    // Waiting on #send_textarea alone races the dialog and can miss it entirely.
+    stage = 'wait-onboarding-or-app-ready';
     await page.waitForFunction(() => {
         const onboarding = document.querySelector('dialog[open] .onboarding');
-        const shellReady = Boolean(window.SillyTavern?.getContext && document.querySelector('#send_textarea'));
-        return Boolean(onboarding) || shellReady;
+        const context = window.SillyTavern?.getContext?.();
+        const appReadyType = context?.eventTypes?.APP_READY;
+        const ready = Boolean(context?.eventSource?.autoFireLastArgs
+            && ((appReadyType && context.eventSource.autoFireLastArgs.has(appReadyType))
+                || context.eventSource.autoFireLastArgs.has('app_ready')));
+        return Boolean(onboarding) || ready;
     });
 
     stage = 'resolve-onboarding';
     const onboarding = page.locator('dialog[open] .onboarding');
     if (await onboarding.count()) {
         const nameInput = page.locator('dialog[open] .popup-input');
-        if (await nameInput.count()) await nameInput.fill('Echo Tester');
+        if (!(await nameInput.count())) throw new Error('Onboarding was visible but persona input was missing');
+        await nameInput.fill('Echo Tester');
         const ok = page.locator('dialog[open] .popup-button-ok');
         if (!(await ok.count())) throw new Error('Onboarding was visible but OK button was missing');
         await ok.click();
     }
 
-    stage = 'wait-shell';
-    await page.waitForFunction(() => Boolean(window.SillyTavern?.getContext && document.querySelector('#send_textarea')));
-
     stage = 'wait-app-ready';
-    await page.waitForFunction(() => {
-        const context = window.SillyTavern?.getContext?.();
-        if (!context?.eventSource?.autoFireLastArgs) return false;
-        const appReadyType = context.eventTypes?.APP_READY;
-        return Boolean((appReadyType && context.eventSource.autoFireLastArgs.has(appReadyType))
-            || context.eventSource.autoFireLastArgs.has('app_ready'));
-    });
+    await page.waitForFunction(appReadyPredicate);
 
     stage = 'build-fixture';
     const result = await page.evaluate(async () => {
