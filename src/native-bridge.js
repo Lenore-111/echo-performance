@@ -1,7 +1,7 @@
 const BRIDGE_MARK = Symbol.for('echo.performance.native-cold-bridge');
 const COMMAND_BRIDGE_MARK = Symbol.for('echo.performance.chat-jump-bridge');
-const PIN_MS = 2600;
-const TRACE_LIMIT = 160;
+const OPERATION_GUARD_MS = 60000;
+const TRACE_LIMIT = 240;
 const COLD_CLICK_SELECTOR = [
     '.mes_edit',
     '.mes_reasoning_header',
@@ -70,7 +70,9 @@ export function installNativeColdBridge(viewport, nativeGetContext) {
     if (globalThis.SillyTavern[BRIDGE_MARK]) return globalThis.SillyTavern[BRIDGE_MARK];
 
     const attachedShells = new WeakSet();
-    const pinTimers = new Map();
+    const temporaryMounts = new Map();
+    const safetyTimers = new Map();
+    const jumpLocks = new Map();
     const lifecycleTrace = [];
     const bridgeStats = {
         installed: true,
@@ -82,9 +84,11 @@ export function installNativeColdBridge(viewport, nativeGetContext) {
         deferredCompacts: 0,
         commandBridgeInstalled: false,
         commandBridgeInvocations: 0,
+        safetyReleases: 0,
     };
     let commandBridgeAttempts = 0;
     let commandBridgeTimer = null;
+    let releaseSweepFrame = null;
 
     function describeActiveElement(chunk) {
         const active = document.activeElement;
@@ -133,82 +137,364 @@ export function installNativeColdBridge(viewport, nativeGetContext) {
         };
     }
 
+    function snapshotRecord(record) {
+        if (!record) return null;
+        return {
+            mesId: record.mesId,
+            chunkId: record.chunkId,
+            mountReason: record.mountReason,
+            mountedAt: record.mountedAt,
+            temporaryPin: record.temporaryPin,
+            activeOperations: record.activeOperations,
+            operationFinished: record.operationFinished,
+            releaseRequested: record.releaseRequested,
+            eligibleForCompact: record.eligibleForCompact,
+            compactAttempted: record.compactAttempted,
+            compactResult: record.compactResult ? structuredClone(record.compactResult) : null,
+        };
+    }
+
     function pushTrace(event, { mesId = null, chunk = null, reason = null, releaseReason = null, extra = null } = {}) {
+        const id = Number(mesId);
+        const record = Number.isInteger(id) ? temporaryMounts.get(id) ?? null : null;
         lifecycleTrace.push({
             event,
             at: performance.now(),
-            mesId: Number.isInteger(Number(mesId)) ? Number(mesId) : null,
-            chunkId: chunk?.id ?? null,
-            mountReason: reason,
+            mesId: Number.isInteger(id) ? id : null,
+            chunkId: chunk?.id ?? record?.chunkId ?? null,
+            mountReason: reason ?? record?.mountReason ?? null,
             releaseReason,
+            temporaryMount: snapshotRecord(record),
             eligibility: chunkEligibility(chunk),
             extra,
         });
         if (lifecycleTrace.length > TRACE_LIMIT) lifecycleTrace.splice(0, lifecycleTrace.length - TRACE_LIMIT);
     }
 
-    function scheduleAfterPin(chunk, mesId = null, reason = null) {
-        if (!chunk) return;
-        const previous = pinTimers.get(chunk);
-        if (previous !== undefined) clearTimeout(previous);
-
-        const run = () => {
-            const remaining = Number(chunk.pinUntil || 0) - performance.now();
-            if (remaining > 16) {
-                pinTimers.set(chunk, setTimeout(run, Math.ceil(remaining) + 24));
-                return;
-            }
-            pinTimers.delete(chunk);
-            pushTrace('release-check', { mesId, chunk, reason, releaseReason: 'pin-expired' });
-            if (!viewport.enabled || viewport.paused || viewport.generating) {
-                pushTrace('compact-skipped', {
-                    mesId,
-                    chunk,
-                    reason,
-                    releaseReason: 'viewport-state',
-                    extra: { enabled: viewport.enabled, paused: viewport.paused, generating: viewport.generating },
-                });
-                return;
-            }
-            bridgeStats.deferredCompacts += 1;
-            pushTrace('compact-attempted', { mesId, chunk, reason, releaseReason: 'pin-expired' });
-            viewport.scheduleCompact?.(0);
-            setTimeout(() => {
-                requestAnimationFrame(() => requestAnimationFrame(() => {
-                    pushTrace('compact-observed', {
-                        mesId,
-                        chunk,
-                        reason,
-                        releaseReason: chunk.mounted ? 'still-mounted' : 'detached',
-                        extra: { compactSucceeded: !chunk.mounted },
-                    });
-                }));
-            }, 80);
-        };
-
-        const delay = Math.max(24, Math.ceil(Number(chunk.pinUntil || 0) - performance.now()) + 24);
-        pinTimers.set(chunk, setTimeout(run, delay));
+    function chunkFor(mesId) {
+        return viewport.messageToChunk?.get?.(Number(mesId)) ?? null;
     }
 
-    function pinChunk(mesId, reason = 'temporary-mount') {
-        const chunk = viewport.messageToChunk?.get?.(Number(mesId));
-        if (!chunk) {
-            pushTrace('pin-miss', { mesId, reason });
-            return null;
+    function createTemporaryMount(mesId, chunk, reason) {
+        const record = {
+            mesId: Number(mesId),
+            chunkId: chunk?.id ?? null,
+            mountReason: reason ?? 'temporary-mount',
+            mountedAt: null,
+            temporaryPin: true,
+            activeOperations: 0,
+            operationFinished: false,
+            releaseRequested: false,
+            eligibleForCompact: false,
+            compactAttempted: false,
+            compactResult: null,
+            _attemptInFlight: false,
+            _lastBlockReason: null,
+        };
+        temporaryMounts.set(record.mesId, record);
+        armSafetyRelease(record);
+        return record;
+    }
+
+    function getTemporaryMount(mesId, reason = null, { createForDetached = true } = {}) {
+        const id = Number(mesId);
+        if (!Number.isInteger(id) || id < 0) return { record: null, chunk: null };
+        const chunk = chunkFor(id);
+        let record = temporaryMounts.get(id) ?? null;
+        if (!record && createForDetached && chunk && !chunk.mounted) record = createTemporaryMount(id, chunk, reason);
+        if (record && chunk) record.chunkId = chunk.id;
+        return { record, chunk };
+    }
+
+    function clearSafetyTimer(mesId) {
+        const timer = safetyTimers.get(Number(mesId));
+        if (timer !== undefined) clearTimeout(timer);
+        safetyTimers.delete(Number(mesId));
+    }
+
+    function armSafetyRelease(record) {
+        if (!record) return;
+        clearSafetyTimer(record.mesId);
+        safetyTimers.set(record.mesId, setTimeout(() => {
+            safetyTimers.delete(record.mesId);
+            const current = temporaryMounts.get(record.mesId);
+            if (current !== record || record.releaseRequested) return;
+            bridgeStats.safetyReleases += 1;
+            pushTrace('operation-timeout', {
+                mesId: record.mesId,
+                chunk: chunkFor(record.mesId),
+                reason: record.mountReason,
+                releaseReason: 'operation-guard-timeout',
+                extra: { activeOperations: record.activeOperations },
+            });
+            record.activeOperations = 0;
+            record.operationFinished = true;
+            record.temporaryPin = false;
+            jumpLocks.delete(record.mesId);
+            requestRelease(record, 'operation-guard-timeout');
+        }, OPERATION_GUARD_MS));
+    }
+
+    function incrementJumpLock(mesId) {
+        const id = Number(mesId);
+        jumpLocks.set(id, (jumpLocks.get(id) ?? 0) + 1);
+    }
+
+    function decrementJumpLock(mesId) {
+        const id = Number(mesId);
+        const next = Math.max(0, (jumpLocks.get(id) ?? 0) - 1);
+        if (next) jumpLocks.set(id, next);
+        else jumpLocks.delete(id);
+    }
+
+    function isJumpReason(reason) {
+        return String(reason ?? '').includes('chat-jump') || String(reason ?? '').includes('chat-scrollto') || String(reason ?? '').includes('floor-teleport');
+    }
+
+    function beginOperation(mesId, reason) {
+        const id = Number(mesId);
+        const { record, chunk } = getTemporaryMount(id, reason, { createForDetached: true });
+        if (record) {
+            record.activeOperations += 1;
+            record.operationFinished = false;
+            record.releaseRequested = false;
+            record.eligibleForCompact = false;
+            record.compactAttempted = false;
+            record.compactResult = null;
+            record.temporaryPin = true;
+            record._attemptInFlight = false;
+            record._lastBlockReason = null;
+            if (isJumpReason(reason)) incrementJumpLock(id);
+            armSafetyRelease(record);
         }
-        chunk.pinUntil = Math.max(Number(chunk.pinUntil || 0), performance.now() + PIN_MS);
-        pushTrace('pin-set', { mesId, chunk, reason });
-        scheduleAfterPin(chunk, Number(mesId), reason);
-        return chunk;
+        pushTrace('operation-started', {
+            mesId: id,
+            chunk,
+            reason,
+            extra: { activeOperations: record?.activeOperations ?? 0, temporary: Boolean(record) },
+        });
+        return record;
+    }
+
+    function finishOperation(mesId, reason, releaseReason = 'operation-complete') {
+        const id = Number(mesId);
+        const record = temporaryMounts.get(id) ?? null;
+        const chunk = chunkFor(id);
+        if (record) {
+            record.activeOperations = Math.max(0, record.activeOperations - 1);
+            if (isJumpReason(reason)) decrementJumpLock(id);
+        }
+        pushTrace('operation-finished', {
+            mesId: id,
+            chunk,
+            reason,
+            releaseReason,
+            extra: { activeOperations: record?.activeOperations ?? 0 },
+        });
+        if (!record || record.activeOperations !== 0) return;
+        record.operationFinished = true;
+        record.temporaryPin = false;
+        requestRelease(record, releaseReason);
+    }
+
+    function requestRelease(record, releaseReason) {
+        if (!record) return;
+        record.releaseRequested = true;
+        clearSafetyTimer(record.mesId);
+        pushTrace('release-requested', {
+            mesId: record.mesId,
+            chunk: chunkFor(record.mesId),
+            reason: record.mountReason,
+            releaseReason,
+            extra: { activeOperations: record.activeOperations },
+        });
+        scheduleReleaseSweep();
+    }
+
+    function interactiveLockReason(record, chunk) {
+        if (!chunk?.mounted) return null;
+        if (chunk.nodes.some(node => node.querySelector?.('.edit_textarea, textarea:focus, input:focus, [contenteditable="true"]:focus'))) {
+            return 'editing-lock';
+        }
+        const active = document.activeElement;
+        if (active instanceof Element && chunk.nodes.some(node => node.contains(active))) return 'focus-lock';
+        if (String(record?.mountReason ?? '').includes('reasoning') && chunk.nodes.some(node => node.querySelector?.('details[open]'))) {
+            return 'reasoning-open';
+        }
+        return null;
+    }
+
+    function siblingLockReason(record, chunk) {
+        if (!chunk) return null;
+        for (const other of temporaryMounts.values()) {
+            if (other === record || other.chunkId !== chunk.id) continue;
+            if (other.activeOperations > 0) return 'chunk-operation-active';
+            if (!other.releaseRequested) return 'chunk-temporary-mount-active';
+        }
+        return null;
+    }
+
+    function releaseBlockReason(record, chunk) {
+        if (!record.releaseRequested) return 'release-not-requested';
+        if (record.activeOperations !== 0) return 'operation-active';
+        if (!viewport.enabled) return 'viewport-disabled';
+        if (viewport.paused) return 'viewport-paused';
+        if (viewport.generating) return 'generation-lock';
+        if ((jumpLocks.get(record.mesId) ?? 0) > 0) return 'jump-lock';
+        if (!chunk) return 'chunk-missing';
+        const interaction = interactiveLockReason(record, chunk);
+        if (interaction) return interaction;
+        return siblingLockReason(record, chunk);
+    }
+
+    function emitBlocked(record, chunk, reason) {
+        if (record._lastBlockReason === reason) return;
+        record._lastBlockReason = reason;
+        record.eligibleForCompact = false;
+        record.compactResult = { result: 'blocked', reason };
+        pushTrace('compact-result', {
+            mesId: record.mesId,
+            chunk,
+            reason: record.mountReason,
+            releaseReason: reason,
+            extra: { result: 'blocked', reason, attempted: false },
+        });
+    }
+
+    function finishDetachedChunk(chunk) {
+        if (!chunk) return;
+        for (const record of [...temporaryMounts.values()]) {
+            if (record.chunkId !== chunk.id) continue;
+            record.eligibleForCompact = true;
+            record.compactResult = { result: 'detached' };
+            pushTrace('compact-result', {
+                mesId: record.mesId,
+                chunk,
+                reason: record.mountReason,
+                releaseReason: 'detached',
+                extra: { result: 'detached' },
+            });
+            clearSafetyTimer(record.mesId);
+            temporaryMounts.delete(record.mesId);
+            jumpLocks.delete(record.mesId);
+        }
+    }
+
+    function observeCompactResult(record, chunk) {
+        setTimeout(() => {
+            requestAnimationFrame(() => requestAnimationFrame(() => {
+                const current = temporaryMounts.get(record.mesId);
+                if (current !== record) return;
+                record._attemptInFlight = false;
+                if (!chunk.mounted) {
+                    finishDetachedChunk(chunk);
+                    return;
+                }
+
+                const eligibility = chunkEligibility(chunk);
+                let reason = releaseBlockReason(record, chunk);
+                if (!reason && !eligibility?.far) reason = 'not-far';
+                if (!reason && eligibility?.canCompact === false) reason = 'chunk-ineligible';
+                if (!reason) reason = 'compact-not-detached';
+                record.compactResult = { result: 'blocked', reason };
+                record._lastBlockReason = reason;
+                pushTrace('compact-result', {
+                    mesId: record.mesId,
+                    chunk,
+                    reason: record.mountReason,
+                    releaseReason: reason,
+                    extra: { result: 'blocked', reason, attempted: true },
+                });
+            }));
+        }, 0);
+    }
+
+    function attemptRelease(record) {
+        if (!record || record._attemptInFlight) return;
+        const chunk = chunkFor(record.mesId);
+        if (chunk && !chunk.mounted) {
+            finishDetachedChunk(chunk);
+            return;
+        }
+        const blocked = releaseBlockReason(record, chunk);
+        if (blocked) {
+            emitBlocked(record, chunk, blocked);
+            return;
+        }
+
+        record.eligibleForCompact = true;
+        record._lastBlockReason = null;
+        pushTrace('eligible-for-compact', {
+            mesId: record.mesId,
+            chunk,
+            reason: record.mountReason,
+            extra: { activeOperations: record.activeOperations },
+        });
+
+        // Bridge-owned temporary mounts use operation state as the release authority.
+        // A click/focus pin created while the temporary chunk was mounted must not
+        // turn normal release back into a timer-driven lifecycle.
+        if (chunk && Number(chunk.pinUntil || 0) > performance.now()) chunk.pinUntil = 0;
+
+        record.compactAttempted = true;
+        record._attemptInFlight = true;
+        bridgeStats.deferredCompacts += 1;
+        pushTrace('compact-attempted', {
+            mesId: record.mesId,
+            chunk,
+            reason: record.mountReason,
+            extra: { activeOperations: record.activeOperations },
+        });
+        viewport.scheduleCompact?.(0);
+        observeCompactResult(record, chunk);
+    }
+
+    function runReleaseSweep() {
+        releaseSweepFrame = null;
+        for (const record of [...temporaryMounts.values()]) {
+            if (record.releaseRequested) attemptRelease(record);
+        }
+    }
+
+    function scheduleReleaseSweep() {
+        if (releaseSweepFrame !== null) return;
+        releaseSweepFrame = requestAnimationFrame(() => {
+            releaseSweepFrame = requestAnimationFrame(runReleaseSweep);
+        });
+    }
+
+    function resetTemporaryMounts(reason) {
+        if (!temporaryMounts.size) return;
+        for (const record of temporaryMounts.values()) {
+            clearSafetyTimer(record.mesId);
+            pushTrace('temporary-mount-reset', {
+                mesId: record.mesId,
+                chunk: chunkFor(record.mesId),
+                reason: record.mountReason,
+                releaseReason: reason,
+            });
+        }
+        temporaryMounts.clear();
+        jumpLocks.clear();
     }
 
     function ensure(mesId, reason) {
         const id = Number(mesId);
         if (!Number.isInteger(id) || id < 0) return null;
-        const chunk = pinChunk(id, reason);
-        pushTrace('mount-requested', { mesId: id, chunk, reason });
+        const { record, chunk } = getTemporaryMount(id, reason, { createForDetached: true });
+        pushTrace('mount-requested', {
+            mesId: id,
+            chunk,
+            reason,
+            extra: { activeOperations: record?.activeOperations ?? 0, temporary: Boolean(record) },
+        });
         const node = viewport.ensureMessageMounted(id, { reason });
         if (node instanceof HTMLElement) bridgeStats.apiMounts += 1;
+        if (record && node instanceof HTMLElement) {
+            record.mountedAt ??= performance.now();
+            record.temporaryPin = true;
+            armSafetyRelease(record);
+        }
         pushTrace('mount-finished', {
             mesId: id,
             chunk,
@@ -232,11 +518,11 @@ export function installNativeColdBridge(viewport, nativeGetContext) {
             event.preventDefault();
             event.stopImmediatePropagation();
             const reason = `cold-dom-interaction:${target.className || target.tagName}`;
-            const chunk = pinChunk(mesId, reason);
-            pushTrace('operation-started', { mesId, chunk, reason });
-            const restored = viewport.ensureMessageMounted(mesId, { reason: 'cold-dom-interaction' });
+            beginOperation(mesId, reason);
+            const restored = ensure(mesId, reason);
+            const chunk = chunkFor(mesId);
             if (!(restored instanceof HTMLElement) || !target.isConnected) {
-                pushTrace('operation-finished', { mesId, chunk, reason, releaseReason: 'mount-failed' });
+                finishOperation(mesId, reason, 'mount-failed');
                 return;
             }
 
@@ -245,6 +531,7 @@ export function installNativeColdBridge(viewport, nativeGetContext) {
                 if (target.isConnected) target.click();
                 requestAnimationFrame(() => requestAnimationFrame(() => {
                     pushTrace('operation-dispatched', { mesId, chunk, reason });
+                    finishOperation(mesId, reason, 'dom-event-dispatched');
                 }));
             });
         }, true);
@@ -257,7 +544,7 @@ export function installNativeColdBridge(viewport, nativeGetContext) {
     }
 
     async function finalizeJump(target) {
-        const chunk = viewport.messageToChunk?.get?.(Number(target)) ?? null;
+        const chunk = chunkFor(target);
         pushTrace('jump-finalize-started', { mesId: Number(target), chunk, reason: 'native-chat-jump' });
         await twoFrames();
         const root = viewport.root;
@@ -293,19 +580,20 @@ export function installNativeColdBridge(viewport, nativeGetContext) {
             const originalCallback = command.callback;
             command.callback = async function (args, index) {
                 const target = commandTarget(index);
-                const chunk = target === null ? null : viewport.messageToChunk?.get?.(target) ?? null;
                 if (target !== null) {
-                    pushTrace('operation-started', { mesId: target, chunk, reason: 'native-chat-jump-command' });
+                    beginOperation(target, 'native-chat-jump-command');
                     const mounted = ensure(target, 'native-chat-jump-command');
                     if (mounted instanceof HTMLElement) bridgeStats.jumpPreMounts += 1;
                 }
                 bridgeStats.commandBridgeInvocations += 1;
-                const result = await Reflect.apply(originalCallback, this, [args, index]);
-                if (target !== null) {
-                    await finalizeJump(target);
-                    pushTrace('operation-finished', { mesId: target, chunk, reason: 'native-chat-jump-command', releaseReason: 'native-callback-resolved' });
+                try {
+                    return await Reflect.apply(originalCallback, this, [args, index]);
+                } finally {
+                    if (target !== null) {
+                        await finalizeJump(target);
+                        finishOperation(target, 'native-chat-jump-command', 'native-callback-resolved');
+                    }
                 }
-                return result;
             };
             Object.defineProperty(command, COMMAND_BRIDGE_MARK, { value: true, configurable: false });
             bridgeStats.commandBridgeInstalled = true;
@@ -335,15 +623,14 @@ export function installNativeColdBridge(viewport, nativeGetContext) {
             if (typeof context.swipe.to === 'function') {
                 bridged.swipe.to = async function (event, direction, options = {}) {
                     const mesId = resolveSwipeMesId(context, event, options);
-                    const chunk = mesId === null ? null : viewport.messageToChunk?.get?.(mesId) ?? null;
                     if (mesId !== null) {
-                        pushTrace('operation-started', { mesId, chunk, reason: 'native-swipe' });
+                        beginOperation(mesId, 'native-swipe');
                         ensure(mesId, 'native-swipe');
                     }
                     try {
                         return await Reflect.apply(context.swipe.to, context.swipe, [event, direction, options]);
                     } finally {
-                        if (mesId !== null) pushTrace('operation-finished', { mesId, chunk, reason: 'native-swipe', releaseReason: 'native-promise-settled' });
+                        if (mesId !== null) finishOperation(mesId, 'native-swipe', 'native-promise-settled');
                     }
                 };
             }
@@ -352,15 +639,15 @@ export function installNativeColdBridge(viewport, nativeGetContext) {
                 if (typeof context.swipe[key] !== 'function') continue;
                 bridged.swipe[key] = async function (event, options = {}) {
                     const mesId = resolveSwipeMesId(context, event, options);
-                    const chunk = mesId === null ? null : viewport.messageToChunk?.get?.(mesId) ?? null;
+                    const reason = `native-swipe-${key}`;
                     if (mesId !== null) {
-                        pushTrace('operation-started', { mesId, chunk, reason: `native-swipe-${key}` });
-                        ensure(mesId, `native-swipe-${key}`);
+                        beginOperation(mesId, reason);
+                        ensure(mesId, reason);
                     }
                     try {
                         return await Reflect.apply(context.swipe[key], context.swipe, [event, options]);
                     } finally {
-                        if (mesId !== null) pushTrace('operation-finished', { mesId, chunk, reason: `native-swipe-${key}`, releaseReason: 'native-promise-settled' });
+                        if (mesId !== null) finishOperation(mesId, reason, 'native-promise-settled');
                     }
                 };
             }
@@ -368,15 +655,30 @@ export function installNativeColdBridge(viewport, nativeGetContext) {
 
         if (typeof context.updateMessageBlock === 'function') {
             bridged.updateMessageBlock = function (messageId, ...args) {
-                ensure(messageId, 'native-update-message');
-                return Reflect.apply(context.updateMessageBlock, context, [messageId, ...args]);
+                const reason = 'native-update-message';
+                beginOperation(messageId, reason);
+                ensure(messageId, reason);
+                try {
+                    return Reflect.apply(context.updateMessageBlock, context, [messageId, ...args]);
+                } finally {
+                    finishOperation(messageId, reason, 'native-call-returned');
+                }
             };
         }
 
         if (typeof context.updateReasoningUI === 'function') {
             bridged.updateReasoningUI = function (messageIdOrElement, ...args) {
-                if (typeof messageIdOrElement === 'number') ensure(messageIdOrElement, 'native-reasoning');
-                return Reflect.apply(context.updateReasoningUI, context, [messageIdOrElement, ...args]);
+                if (typeof messageIdOrElement !== 'number') {
+                    return Reflect.apply(context.updateReasoningUI, context, [messageIdOrElement, ...args]);
+                }
+                const reason = 'native-reasoning';
+                beginOperation(messageIdOrElement, reason);
+                ensure(messageIdOrElement, reason);
+                try {
+                    return Reflect.apply(context.updateReasoningUI, context, [messageIdOrElement, ...args]);
+                } finally {
+                    finishOperation(messageIdOrElement, reason, 'native-call-returned');
+                }
             };
         }
 
@@ -384,9 +686,9 @@ export function installNativeColdBridge(viewport, nativeGetContext) {
             if (typeof context[key] !== 'function') continue;
             bridged[key] = async function (...args) {
                 const target = extractChatJumpTarget(args[0]);
-                const chunk = target === null ? null : viewport.messageToChunk?.get?.(target) ?? null;
+                const reason = `${key}:chat-jump`;
                 if (target !== null) {
-                    pushTrace('operation-started', { mesId: target, chunk, reason: `${key}:chat-jump` });
+                    beginOperation(target, reason);
                     const mounted = ensure(target, 'native-chat-jump-preflight');
                     if (mounted instanceof HTMLElement) bridgeStats.jumpPreMounts += 1;
                 }
@@ -395,7 +697,7 @@ export function installNativeColdBridge(viewport, nativeGetContext) {
                 } finally {
                     if (target !== null) {
                         await finalizeJump(target);
-                        pushTrace('operation-finished', { mesId: target, chunk, reason: `${key}:chat-jump`, releaseReason: 'native-promise-settled' });
+                        finishOperation(target, reason, 'native-promise-settled');
                     }
                 }
             };
@@ -409,7 +711,7 @@ export function installNativeColdBridge(viewport, nativeGetContext) {
         if (!(input instanceof HTMLTextAreaElement) || input.id !== 'send_textarea') return;
         const target = extractChatJumpTarget(input.value);
         if (target === null) return;
-        const chunk = viewport.messageToChunk?.get?.(target) ?? null;
+        const chunk = chunkFor(target);
         pushTrace('input-preflight', { mesId: target, chunk, reason: 'native-chat-jump-input' });
         const mounted = ensure(target, 'native-chat-jump-input');
         if (mounted instanceof HTMLElement) bridgeStats.inputPreMounts += 1;
@@ -419,6 +721,12 @@ export function installNativeColdBridge(viewport, nativeGetContext) {
     };
     document.addEventListener('input', onChatInput, true);
 
+    const onReleaseRelevantEvent = () => scheduleReleaseSweep();
+    for (const name of ['click', 'focusin', 'focusout', 'keyup', 'toggle']) {
+        document.addEventListener(name, onReleaseRelevantEvent, true);
+    }
+    viewport.root?.addEventListener?.('scroll', onReleaseRelevantEvent, { passive: true });
+
     const bridgedGetContext = () => bridgeContext(nativeGetContext());
     globalThis.SillyTavern.getContext = bridgedGetContext;
 
@@ -427,13 +735,22 @@ export function installNativeColdBridge(viewport, nativeGetContext) {
         ensure,
         finalizeJump,
         lifecycle(type) {
+            if (['CHAT_CHANGED', 'CHAT_LOADED'].includes(type)) resetTemporaryMounts(`lifecycle:${type.toLowerCase()}`);
             if (['CHAT_CHANGED', 'CHAT_LOADED', 'MORE_MESSAGES_LOADED', 'USER_MESSAGE_RENDERED', 'CHARACTER_MESSAGE_RENDERED', 'TOOL_CALLS_RENDERED'].includes(type)) {
                 queueMicrotask(attachCurrent);
             }
             if (['CHAT_CHANGED', 'CHAT_LOADED'].includes(type)) scheduleCommandBridge(0);
+            scheduleReleaseSweep();
         },
         trace: mesId => lifecycleTrace.filter(entry => mesId == null || entry.mesId === Number(mesId)).map(entry => structuredClone(entry)),
-        stats: () => ({ ...bridgeStats, traceCount: lifecycleTrace.length, traceTail: lifecycleTrace.slice(-40).map(entry => structuredClone(entry)) }),
+        temporaryMounts: () => [...temporaryMounts.values()].map(record => snapshotRecord(record)),
+        stats: () => ({
+            ...bridgeStats,
+            temporaryMountCount: temporaryMounts.size,
+            temporaryMounts: [...temporaryMounts.values()].map(record => snapshotRecord(record)),
+            traceCount: lifecycleTrace.length,
+            traceTail: lifecycleTrace.slice(-40).map(entry => structuredClone(entry)),
+        }),
     };
 
     globalThis.SillyTavern[BRIDGE_MARK] = bridge;
