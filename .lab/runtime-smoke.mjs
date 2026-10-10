@@ -11,7 +11,10 @@ await fs.mkdir(out, { recursive: true });
 const checks = []; const errors = [];
 page.on('pageerror', e => { errors.push(e.stack || String(e)); console.log(`PAGE ERROR ${e.stack || e}`); });
 const check = (name, actual, expected = true) => { assert.deepEqual(actual, expected, name); checks.push(name); console.log(`PASS ${name}`); };
-const settle = () => page.waitForFunction(() => EchoPerformance.stats().deferredMessages >= 50);
+const settle = () => page.waitForFunction(() => {
+    const stats = EchoPerformance.stats();
+    return stats.detachedMessageShells >= 50 && stats.liveMessageShells <= 100;
+});
 try {
     await page.goto(process.env.LAB_ST_URL || 'http://127.0.0.1:8039');
     await page.waitForFunction(() => window.SillyTavern?.getContext().eventSource.autoFireLastArgs.has('app_ready'), { timeout: 60000 });
@@ -168,4 +171,3 @@ try {
     await fs.writeFile(path.join(out, process.env.ECHO_COMPAT ? 'compat-smoke.json' : 'runtime-smoke.json'), JSON.stringify({ checks, errors, browser: await browser.version(), runtimeCommit: '8172dcd0ee672d3cd9a5e5f7af134f91a45cd2b8', worldBackstage: process.env.ECHO_COMPAT ? { commit: 'f9babfa0ee0bd3003d3529fd171b83103cfee4c1', manifestVersion: '2.5.8', automaticModelJobsDisabled: true, autoHideArchivedFloors: false } : null, complete: checks.includes('no page exceptions') }, null, 2));
     await browser.close();
 }
-
