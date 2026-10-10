@@ -50,6 +50,15 @@ const selectBench = () => page.evaluate(async()=>{ const s=await import('/script
 const snapshot = () => page.evaluate(() => { const c=SillyTavern.getContext(); return { chat:structuredClone(c.chat), store:structuredClone(c.chatMetadata.world_backstage_v1||null), echo:EchoPerformance.stats(), live:document.querySelectorAll('#chat > .mes').length }; });
 const core = store => { const s=store?.currentState||{}; return { clock:s.clock, people:s.people, events:s.events, locations:s.locations, publicImpactLedger:s.publicImpactLedger }; };
 const semantic = chat => chat.map(m => ({ mes:m?.mes, name:m?.name, is_user:m?.is_user, swipe_id:m?.swipe_id, swipes:m?.swipes, reasoning:m?.extra?.reasoning ?? m?.reasoning ?? null }));
+const diffSemantic = (before, after, limit = 24) => {
+    const rows=[];
+    const length=Math.max(before.length, after.length);
+    for(let i=0;i<length && rows.length<limit;i++) {
+        const a=before[i]; const b=after[i];
+        if(JSON.stringify(a)!==JSON.stringify(b)) rows.push({ index:i, before:a??null, after:b??null });
+    }
+    return { beforeLength:before.length, afterLength:after.length, mismatches:rows, truncated:rows.length===limit };
+};
 const indexed = () => page.evaluate(() => Number(SillyTavern.getContext().chatMetadata.world_backstage_v1?.currentState?.storyMemory?.indexedThroughMessageId ?? -1));
 const hiddenCount = () => page.evaluate(() => SillyTavern.getContext().chat.filter(m=>m.extra?.world_backstage_auto_hidden).length);
 
@@ -121,6 +130,7 @@ try {
         const covered=new Set([...archives,...summaries].filter(s=>s.level===0&&s.startMessageId===s.endMessageId&&s.summary).map(s=>s.endMessageId));
         const preRefresh={ core:core(after.store), hidden:[...hidden], indexed:after.store?.currentState?.storyMemory?.indexedThroughMessageId };
         const semanticAfter=semantic(after.chat.slice(0,-1));
+        const semanticDiff=diffSemantic(semanticBefore,semanticAfter);
         await page.reload(); await ready(); await selectBench();
         await page.evaluate(async({file,enabled})=>{ const s=await import('/script.js'); await s.openCharacterChat(file); EchoPerformance.setEnabled(enabled,false); },{file,enabled});
         if(enabled) await page.waitForFunction(()=>EchoPerformance.stats().detachedMessageShells>=800,null,{timeout:30000});
@@ -132,16 +142,16 @@ try {
             nativeRegenReadable:regenRead.ok,
             hiddenPresent:hidden.length>0,
             hiddenCovered:hidden.length>0 && hidden.every(i=>covered.has(i)&&i<=994),
-            semanticHistoryPreserved:JSON.stringify(semanticBefore)===JSON.stringify(semanticAfter),
+            semanticHistoryPreserved:semanticDiff.beforeLength===semanticDiff.afterLength && semanticDiff.mismatches.length===0,
             worldCoreNotAdvanced:JSON.stringify(coreBefore)===JSON.stringify(core(after.store)),
             refreshWorldCoreStable:JSON.stringify(preRefresh.core)===JSON.stringify(core(refreshed.store)),
             refreshHiddenStable:JSON.stringify(preRefresh.hidden)===JSON.stringify(refreshedHidden),
             refreshIndexedStable:preRefresh.indexed===refreshed.store?.currentState?.storyMemory?.indexedThroughMessageId,
             echoRecompactAfterRefresh:!enabled || (refreshed.echo.detachedMessageShells>=800 && refreshed.live<=180),
         };
-        cases.push({ enabled, requestCount:requests.length-requestStart, drive, hiddenCount:hidden.length, indexedThrough:after.store?.currentState?.storyMemory?.indexedThroughMessageId, refreshedIndexedThrough:refreshed.store?.currentState?.storyMemory?.indexedThroughMessageId, checks });
+        cases.push({ enabled, requestCount:requests.length-requestStart, drive, hiddenCount:hidden.length, indexedThrough:after.store?.currentState?.storyMemory?.indexedThroughMessageId, refreshedIndexedThrough:refreshed.store?.currentState?.storyMemory?.indexedThroughMessageId, semanticDiff, checks });
         await fs.writeFile(path.join(out,'world-v2.json'),JSON.stringify({cases,pageErrors,requests},null,2));
-        console.log(JSON.stringify({enabled,indexed:cases.at(-1).indexedThrough,hidden:hidden.length,wakeups:drive.wakeups,checks}));
+        console.log(JSON.stringify({enabled,indexed:cases.at(-1).indexedThrough,hidden:hidden.length,wakeups:drive.wakeups,semanticDiff,checks}));
     }
     const all=cases.every(c=>Object.values(c.checks).every(Boolean));
     const off=cases.find(c=>!c.enabled), on=cases.find(c=>c.enabled);
