@@ -79,6 +79,21 @@ const coldState = target => page.evaluate(target => ({
     stats: EchoPerformance.stats(),
 }), target);
 
+const moveAwayAndWaitCold = async target => {
+    await page.evaluate(() => {
+        const root = document.querySelector('#chat');
+        root.scrollTo({ top: root.scrollHeight, behavior: 'auto' });
+        root.dispatchEvent(new Event('scroll'));
+        document.querySelector('#send_textarea')?.focus({ preventScroll: true });
+    });
+    let detached = false;
+    try {
+        await page.waitForFunction(target => !document.querySelector(`#chat > .mes[mesid="${target}"]`), target, { timeout: 7000 });
+        detached = true;
+    } catch {}
+    return { detached, ...(await coldState(target)) };
+};
+
 const testDirectColdSwipe = async target => page.evaluate(async target => {
     const context = SillyTavern.getContext();
     const { SWIPE_DIRECTION, SWIPE_SOURCE } = await import('/scripts/constants.js');
@@ -130,34 +145,51 @@ const testJump = async target => page.evaluate(async target => {
     const before = root.scrollTop;
     const started = performance.now();
     await executeSlashCommands(`/chat-jump ${target}`);
-    await new Promise(resolve => setTimeout(resolve, 900));
+    await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
     const shell = document.querySelector(`#chat > .mes[mesid="${target}"]`);
-    if (!(shell instanceof HTMLElement)) return { ok: false, liveBefore, reason: 'target missing', ms: performance.now() - started };
+    if (!(shell instanceof HTMLElement)) return { ok: false, liveBefore, reason: 'target not mounted at jump completion', ms: performance.now() - started };
+    window.echoDomRegressionRefs ??= {};
+    const edit = shell.querySelector('.mes_edit');
+    const reasoning = shell.querySelector('.mes_reasoning_header, .mes_reasoning_header_title');
+    window.echoDomRegressionRefs[target] = { shell, edit, reasoning };
     const sr = shell.getBoundingClientRect();
     const rr = root.getBoundingClientRect();
-    return { ok: sr.bottom > rr.top && sr.top < rr.bottom, liveBefore, before, after: root.scrollTop, ms: performance.now() - started };
+    return {
+        ok: sr.bottom > rr.top && sr.top < rr.bottom,
+        liveBefore,
+        before,
+        after: root.scrollTop,
+        controlsCaptured: edit instanceof HTMLElement && reasoning instanceof HTMLElement,
+        ms: performance.now() - started,
+    };
 }, target);
 
-const testEditAndReasoningAfterJump = async target => page.evaluate(async target => {
+const testColdEditFromCaptured = async target => page.evaluate(async target => {
+    const refs = window.echoDomRegressionRefs?.[target];
+    const coldBefore = !(document.querySelector(`#chat > .mes[mesid="${target}"]`) instanceof HTMLElement);
+    refs?.edit?.click();
+    await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
     const shell = document.querySelector(`#chat > .mes[mesid="${target}"]`);
-    if (!(shell instanceof HTMLElement)) return { edit: false, reasoning: false, reason: 'target missing after jump' };
-    const edit = shell.querySelector('.mes_edit');
-    let editOk = false;
-    if (edit instanceof HTMLElement) {
-        edit.click(); await new Promise(r => requestAnimationFrame(r));
-        editOk = shell.querySelector('.edit_textarea') instanceof HTMLElement;
-        shell.querySelector('.mes_edit_cancel')?.click(); await new Promise(r => requestAnimationFrame(r));
-    }
-    const header = shell.querySelector('.mes_reasoning_header');
-    const details = header?.closest('details');
-    let reasoningOk = false;
-    if (header instanceof HTMLElement && details instanceof HTMLDetailsElement) {
-        if (details.open) header.click();
-        header.click(); await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
-        reasoningOk = details.open && Boolean(details.querySelector('.mes_reasoning')?.textContent?.length);
-        if (details.open) header.click();
-    }
-    return { edit: editOk, reasoning: reasoningOk };
+    const textarea = shell?.querySelector('.edit_textarea, #curEditTextarea');
+    const edit = shell instanceof HTMLElement && textarea instanceof HTMLElement;
+    shell?.querySelector('.mes_edit_cancel')?.click();
+    await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+    return { coldBefore, mountedDuring: shell instanceof HTMLElement, edit };
+}, target);
+
+const testColdReasoningFromCaptured = async target => page.evaluate(async target => {
+    const refs = window.echoDomRegressionRefs?.[target];
+    const coldBefore = !(document.querySelector(`#chat > .mes[mesid="${target}"]`) instanceof HTMLElement);
+    refs?.reasoning?.click();
+    await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+    const shell = document.querySelector(`#chat > .mes[mesid="${target}"]`);
+    const details = shell?.querySelector('details');
+    const reasoning = details instanceof HTMLDetailsElement
+        && details.open
+        && Boolean(details.querySelector('.mes_reasoning')?.textContent?.length);
+    shell?.querySelector('.mes_reasoning_header, .mes_reasoning_header_title')?.click();
+    await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+    return { coldBefore, mountedDuring: shell instanceof HTMLElement, reasoning };
 }, target);
 
 const testShowMoreReconcile = async () => page.evaluate(async () => {
@@ -219,7 +251,20 @@ try {
                 await page.waitForTimeout(2600);
                 result.jumpColdBefore = await coldState(jumpTarget);
                 result.jump = await testJump(jumpTarget);
-                result.afterJumpInteractions = await testEditAndReasoningAfterJump(jumpTarget);
+                result.jumpRecompact = await moveAwayAndWaitCold(jumpTarget);
+                result.coldEdit = await testColdEditFromCaptured(jumpTarget);
+                result.editRecompact = await moveAwayAndWaitCold(jumpTarget);
+                result.coldReasoning = await testColdReasoningFromCaptured(jumpTarget);
+                result.reasoningRecompact = await moveAwayAndWaitCold(jumpTarget);
+                result.afterJumpInteractions = {
+                    jumpRecompacted: result.jumpRecompact.detached && result.jumpRecompact.live === false,
+                    editColdBefore: result.coldEdit.coldBefore,
+                    edit: result.coldEdit.edit && result.coldEdit.mountedDuring,
+                    editRecompacted: result.editRecompact.detached && result.editRecompact.live === false,
+                    reasoningColdBefore: result.coldReasoning.coldBefore,
+                    reasoning: result.coldReasoning.reasoning && result.coldReasoning.mountedDuring,
+                    reasoningRecompacted: result.reasoningRecompact.detached && result.reasoningRecompact.live === false,
+                };
                 result.showMore = await testShowMoreReconcile();
                 result.duplicates = await duplicateIds();
                 await page.evaluate(() => { const root = document.querySelector('#chat'); root.scrollTop = root.scrollHeight; });
@@ -243,8 +288,14 @@ try {
     const interactionGate = Boolean(on1000)
         && on1000.jumpColdBefore?.live === false
         && on1000.jump?.ok
+        && on1000.jump?.controlsCaptured
+        && on1000.afterJumpInteractions?.jumpRecompacted
+        && on1000.afterJumpInteractions?.editColdBefore
         && on1000.afterJumpInteractions?.edit
+        && on1000.afterJumpInteractions?.editRecompacted
+        && on1000.afterJumpInteractions?.reasoningColdBefore
         && on1000.afterJumpInteractions?.reasoning
+        && on1000.afterJumpInteractions?.reasoningRecompacted
         && on1000.duplicates?.length === 0
         && on1000.showMore?.duplicates?.length === 0;
     const directColdGate = Boolean(on1000?.directColdSwipe?.supported && on1000.directColdSwipe.liveBefore === false && on1000.directColdSwipe.mountedAfter && on1000.directColdSwipe.stateChanged && on1000.directColdSwipe.domMatchesState && !on1000.directColdSwipe.thrown);
