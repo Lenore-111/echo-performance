@@ -1,0 +1,338 @@
+name: Echo Performance full regression + World Backstage
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - feature/echo-performance-long-chat
+    paths:
+      - index.js
+      - src/**
+      - .lab/runtime-smoke.mjs
+      - .lab/dom-compact-smoke.mjs
+      - .lab/phase3-bridge-smoke-v6.mjs
+      - .lab/phase3-world-v2.mjs
+      - .lab/phase3-fixture-bootstrap.mjs
+      - .lab/expand-regression-fixtures.mjs
+      - .lab/install.sh
+      - .github/workflows/full-regression-world-backstage.yml
+
+permissions:
+  contents: read
+
+env:
+  ST_COMMIT: 8172dcd0ee672d3cd9a5e5f7af134f91a45cd2b8
+  WB_COMMIT: f9babfa0ee0bd3003d3529fd171b83103cfee4c1
+  LAB_ST_URL: http://127.0.0.1:8039/
+  LAB_CHROME: /usr/bin/google-chrome
+
+jobs:
+  static-and-unit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout Echo Performance
+        uses: actions/checkout@v4
+        with:
+          ref: feature/echo-performance-long-chat
+
+      - name: Checkout World Backstage 2.5.8
+        uses: actions/checkout@v4
+        with:
+          repository: h675786161-prog/world-backstage
+          ref: f9babfa0ee0bd3003d3529fd171b83103cfee4c1
+          path: world-backstage
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Echo static checks
+        id: echo_check
+        continue-on-error: true
+        run: |
+          mkdir -p evidence/static
+          npm run check 2>&1 | tee evidence/static/echo-check.log
+          node --check .lab/phase3-bridge-smoke-v6.mjs
+          node --check .lab/phase3-fixture-bootstrap.mjs
+          node --check .lab/expand-regression-fixtures.mjs
+
+      - name: World Backstage unit tests
+        id: wb_test
+        continue-on-error: true
+        working-directory: world-backstage
+        run: |
+          set -o pipefail
+          npm test 2>&1 | tee ../evidence/static/world-backstage-test.log
+
+      - name: World Backstage static checks
+        id: wb_check
+        continue-on-error: true
+        working-directory: world-backstage
+        run: |
+          set -o pipefail
+          npm run check 2>&1 | tee ../evidence/static/world-backstage-check.log
+
+      - name: Record static verdict
+        if: always()
+        run: |
+          cat > evidence/static/verdict.txt <<EOF
+          echo_check=${{ steps.echo_check.outcome }}
+          world_backstage_test=${{ steps.wb_test.outcome }}
+          world_backstage_check=${{ steps.wb_check.outcome }}
+          echo_sha=$GITHUB_SHA
+          world_backstage_sha=$WB_COMMIT
+          sillytavern_sha=$ST_COMMIT
+          EOF
+
+      - name: Upload static evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: full-regression-static
+          path: evidence/static/
+          retention-days: 7
+
+      - name: Enforce static verdict
+        if: always()
+        run: |
+          test '${{ steps.echo_check.outcome }}' = success
+          test '${{ steps.wb_test.outcome }}' = success
+          test '${{ steps.wb_check.outcome }}' = success
+
+  echo-baseline-runtime:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Checkout Echo Performance
+        uses: actions/checkout@v4
+        with:
+          ref: feature/echo-performance-long-chat
+
+      - name: Checkout exact SillyTavern 1.18.0
+        uses: actions/checkout@v4
+        with:
+          repository: SillyTavern/SillyTavern
+          ref: 8172dcd0ee672d3cd9a5e5f7af134f91a45cd2b8
+          path: sillytavern
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install runtime dependencies
+        run: |
+          npm ci --prefix sillytavern --no-audit --no-fund
+          mkdir -p qa-tools
+          npm install --prefix qa-tools --no-audit --no-fund playwright-core@1.55.0
+          test -x "$LAB_CHROME"
+          echo "LAB_PLAYWRIGHT_CORE_ENTRY=$GITHUB_WORKSPACE/qa-tools/node_modules/playwright-core/index.mjs" >> "$GITHUB_ENV"
+
+      - name: Install Echo Performance
+        run: |
+          export ST_DIR="$GITHUB_WORKSPACE/sillytavern"
+          export TARGET_DIR="$GITHUB_WORKSPACE"
+          export EXT_DIR="$GITHUB_WORKSPACE/sillytavern/public/scripts/extensions/third-party/echo-performance"
+          bash .lab/install.sh
+
+      - name: Start clean SillyTavern
+        working-directory: sillytavern
+        run: |
+          mkdir -p ../echo-baseline-data evidence
+          node server.js --port 8039 --dataRoot "$GITHUB_WORKSPACE/echo-baseline-data" --whitelist false --browserLaunchEnabled false > "$GITHUB_WORKSPACE/evidence/baseline-st.log" 2>&1 &
+          echo $! > "$GITHUB_WORKSPACE/evidence/baseline-st.pid"
+          timeout 90 bash -c 'until curl -fsS http://127.0.0.1:8039/ >/dev/null; do sleep 1; done'
+
+      - name: Bootstrap all regression fixtures
+        run: |
+          LAB_EVIDENCE_DIR="$GITHUB_WORKSPACE/evidence/baseline/bootstrap" node .lab/phase3-fixture-bootstrap.mjs
+          node .lab/expand-regression-fixtures.mjs
+
+      - name: Legacy full runtime regression
+        id: legacy
+        continue-on-error: true
+        run: LAB_EVIDENCE_DIR="$GITHUB_WORKSPACE/evidence/baseline/runtime" node .lab/runtime-smoke.mjs
+
+      - name: Re-seed fixtures after legacy runtime
+        if: always()
+        run: |
+          LAB_EVIDENCE_DIR="$GITHUB_WORKSPACE/evidence/baseline/reseed-dom" node .lab/phase3-fixture-bootstrap.mjs
+          node .lab/expand-regression-fixtures.mjs
+
+      - name: Phase 3A DOM Compact regression
+        id: dom
+        continue-on-error: true
+        run: LAB_EVIDENCE_DIR="$GITHUB_WORKSPACE/evidence/baseline/dom" node .lab/dom-compact-smoke.mjs
+
+      - name: Re-seed 1000-floor fixture before bridge smoke
+        if: always()
+        run: LAB_EVIDENCE_DIR="$GITHUB_WORKSPACE/evidence/baseline/reseed-bridge" node .lab/phase3-fixture-bootstrap.mjs
+
+      - name: Phase 3B Native Cold Bridge regression
+        id: bridge
+        continue-on-error: true
+        run: LAB_EVIDENCE_DIR="$GITHUB_WORKSPACE/evidence/baseline/bridge" node .lab/phase3-bridge-smoke-v6.mjs
+
+      - name: Record baseline verdict
+        if: always()
+        run: |
+          mkdir -p evidence/baseline
+          cat > evidence/baseline/verdict.txt <<EOF
+          legacy_runtime=${{ steps.legacy.outcome }}
+          dom_compact=${{ steps.dom.outcome }}
+          native_cold_bridge=${{ steps.bridge.outcome }}
+          echo_sha=$GITHUB_SHA
+          sillytavern_sha=$ST_COMMIT
+          EOF
+          tail -200 evidence/baseline-st.log > evidence/baseline/st-tail.log || true
+
+      - name: Upload baseline evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: full-regression-echo-baseline
+          path: evidence/
+          retention-days: 7
+
+      - name: Enforce baseline verdict
+        if: always()
+        run: |
+          test '${{ steps.legacy.outcome }}' = success
+          test '${{ steps.dom.outcome }}' = success
+          test '${{ steps.bridge.outcome }}' = success
+
+  world-backstage-compat-runtime:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - name: Checkout Echo Performance
+        uses: actions/checkout@v4
+        with:
+          ref: feature/echo-performance-long-chat
+
+      - name: Checkout exact SillyTavern 1.18.0
+        uses: actions/checkout@v4
+        with:
+          repository: SillyTavern/SillyTavern
+          ref: 8172dcd0ee672d3cd9a5e5f7af134f91a45cd2b8
+          path: sillytavern
+
+      - name: Checkout World Backstage 2.5.8
+        uses: actions/checkout@v4
+        with:
+          repository: h675786161-prog/world-backstage
+          ref: f9babfa0ee0bd3003d3529fd171b83103cfee4c1
+          path: world-backstage
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install runtime dependencies
+        run: |
+          npm ci --prefix sillytavern --no-audit --no-fund
+          mkdir -p qa-tools
+          npm install --prefix qa-tools --no-audit --no-fund playwright-core@1.55.0
+          test -x "$LAB_CHROME"
+          echo "LAB_PLAYWRIGHT_CORE_ENTRY=$GITHUB_WORKSPACE/qa-tools/node_modules/playwright-core/index.mjs" >> "$GITHUB_ENV"
+
+      - name: Install both extensions
+        run: |
+          export ST_DIR="$GITHUB_WORKSPACE/sillytavern"
+          export TARGET_DIR="$GITHUB_WORKSPACE"
+          export EXT_DIR="$GITHUB_WORKSPACE/sillytavern/public/scripts/extensions/third-party/echo-performance"
+          bash .lab/install.sh
+          WB_DIR="$GITHUB_WORKSPACE/sillytavern/public/scripts/extensions/third-party/world-backstage"
+          mkdir -p "$WB_DIR"
+          rsync -a --delete --exclude='.git/' --exclude='node_modules/' world-backstage/ "$WB_DIR/"
+          test -f "$WB_DIR/manifest.json"
+
+      - name: Start clean SillyTavern with both extensions
+        working-directory: sillytavern
+        run: |
+          mkdir -p ../echo-compat-data evidence
+          node server.js --port 8039 --dataRoot "$GITHUB_WORKSPACE/echo-compat-data" --whitelist false --browserLaunchEnabled false > "$GITHUB_WORKSPACE/evidence/compat-st.log" 2>&1 &
+          echo $! > "$GITHUB_WORKSPACE/evidence/compat-st.pid"
+          timeout 90 bash -c 'until curl -fsS http://127.0.0.1:8039/ >/dev/null; do sleep 1; done'
+
+      - name: Bootstrap all regression fixtures
+        run: |
+          LAB_EVIDENCE_DIR="$GITHUB_WORKSPACE/evidence/compat/bootstrap" node .lab/phase3-fixture-bootstrap.mjs
+          node .lab/expand-regression-fixtures.mjs
+
+      - name: Echo legacy runtime with World Backstage loaded
+        id: echo_compat
+        continue-on-error: true
+        env:
+          ECHO_COMPAT: '1'
+        run: LAB_EVIDENCE_DIR="$GITHUB_WORKSPACE/evidence/compat/echo-runtime" node .lab/runtime-smoke.mjs
+
+      - name: Re-seed fixtures for DOM Compact compatibility
+        if: always()
+        run: |
+          LAB_EVIDENCE_DIR="$GITHUB_WORKSPACE/evidence/compat/reseed-dom" node .lab/phase3-fixture-bootstrap.mjs
+          node .lab/expand-regression-fixtures.mjs
+
+      - name: Phase 3A DOM Compact with World Backstage loaded
+        id: dom_compat
+        continue-on-error: true
+        run: LAB_EVIDENCE_DIR="$GITHUB_WORKSPACE/evidence/compat/dom" node .lab/dom-compact-smoke.mjs
+
+      - name: Re-seed fixture for cold bridge compatibility
+        if: always()
+        run: LAB_EVIDENCE_DIR="$GITHUB_WORKSPACE/evidence/compat/reseed-bridge" node .lab/phase3-fixture-bootstrap.mjs
+
+      - name: Phase 3B cold bridge with World Backstage loaded
+        id: bridge_compat
+        continue-on-error: true
+        run: LAB_EVIDENCE_DIR="$GITHUB_WORKSPACE/evidence/compat/bridge" node .lab/phase3-bridge-smoke-v6.mjs
+
+      - name: World Backstage own real-ST memory + auto-hide smoke
+        id: wb_runtime
+        continue-on-error: true
+        run: |
+          LAB_PLAYWRIGHT_CORE_ENTRY="file://$GITHUB_WORKSPACE/qa-tools/node_modules/playwright-core/index.mjs" \
+          LAB_EVIDENCE_DIR="$GITHUB_WORKSPACE/evidence/compat/world-backstage" \
+          node world-backstage/.lab/runtime-smoke.mjs
+
+      - name: Re-seed fixture for active World Backstage stress
+        if: always()
+        run: LAB_EVIDENCE_DIR="$GITHUB_WORKSPACE/evidence/compat/reseed-world" node .lab/phase3-fixture-bootstrap.mjs
+
+      - name: 1000-floor active memory/auto-hide/regenerate/reload OFF-vs-ON comparison
+        id: world_stress
+        continue-on-error: true
+        run: LAB_EVIDENCE_DIR="$GITHUB_WORKSPACE/evidence/compat/world-stress" node .lab/phase3-world-v2.mjs
+
+      - name: Record compatibility verdict
+        if: always()
+        run: |
+          mkdir -p evidence/compat
+          cat > evidence/compat/verdict.txt <<EOF
+          echo_legacy_compat=${{ steps.echo_compat.outcome }}
+          dom_compact_compat=${{ steps.dom_compat.outcome }}
+          native_cold_bridge_compat=${{ steps.bridge_compat.outcome }}
+          world_backstage_runtime=${{ steps.wb_runtime.outcome }}
+          world_backstage_active_stress=${{ steps.world_stress.outcome }}
+          echo_sha=$GITHUB_SHA
+          world_backstage_sha=$WB_COMMIT
+          sillytavern_sha=$ST_COMMIT
+          EOF
+          tail -250 evidence/compat-st.log > evidence/compat/st-tail.log || true
+
+      - name: Upload compatibility evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: full-regression-world-backstage-compat
+          path: evidence/
+          retention-days: 7
+
+      - name: Enforce compatibility verdict
+        if: always()
+        run: |
+          test '${{ steps.echo_compat.outcome }}' = success
+          test '${{ steps.dom_compat.outcome }}' = success
+          test '${{ steps.bridge_compat.outcome }}' = success
+          test '${{ steps.wb_runtime.outcome }}' = success
+          test '${{ steps.world_stress.outcome }}' = success
