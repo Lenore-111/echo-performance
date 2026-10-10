@@ -1,0 +1,110 @@
+name: Echo Performance Phase 3B runtime
+
+on:
+  push:
+    branches:
+      - feature/echo-performance-long-chat
+    paths:
+      - src/native-bridge.js
+      - .lab/phase3-bridge-smoke-v6.mjs
+      - .lab/phase3-fixture-bootstrap.mjs
+      - .lab/install.sh
+      - .github/workflows/phase3b-runtime.yml
+  workflow_dispatch:
+
+jobs:
+  phase3b-runtime:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      LAB_ST_URL: http://127.0.0.1:8039/
+      LAB_CHROME: /usr/bin/google-chrome
+      LAB_PLAYWRIGHT_CORE_ENTRY: ${{ github.workspace }}/qa-tools/node_modules/playwright-core/index.mjs
+      LAB_EVIDENCE_DIR: ${{ github.workspace }}/evidence/phase3-bridge-smoke-v6
+    steps:
+      - name: Checkout Echo Performance
+        uses: actions/checkout@v4
+        with:
+          ref: feature/echo-performance-long-chat
+
+      - name: Checkout SillyTavern 1.18.0 fixture runtime
+        uses: actions/checkout@v4
+        with:
+          repository: SillyTavern/SillyTavern
+          ref: 8172dcd0ee672d3cd9a5e5f7af134f91a45cd2b8
+          path: sillytavern
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install SillyTavern dependencies
+        working-directory: sillytavern
+        run: npm ci --no-audit --no-fund
+
+      - name: Install Playwright core
+        run: |
+          mkdir -p qa-tools
+          npm install --prefix qa-tools --no-audit --no-fund playwright-core@1.55.0
+          test -x "$LAB_CHROME"
+
+      - name: Install Echo Performance into clean SillyTavern
+        run: |
+          export ST_DIR="$GITHUB_WORKSPACE/sillytavern"
+          export TARGET_DIR="$GITHUB_WORKSPACE"
+          export EXT_DIR="$GITHUB_WORKSPACE/sillytavern/public/scripts/extensions/third-party/echo-performance"
+          bash .lab/install.sh
+
+      - name: Static check Phase 3B harness
+        run: |
+          node --check src/native-bridge.js
+          node --check .lab/phase3-fixture-bootstrap.mjs
+          node --check .lab/phase3-bridge-smoke-v6.mjs
+
+      - name: Start clean SillyTavern runtime
+        working-directory: sillytavern
+        run: |
+          mkdir -p ../echo-test-data
+          node server.js \
+            --port 8039 \
+            --dataRoot "$GITHUB_WORKSPACE/echo-test-data" \
+            --whitelist false \
+            --browserLaunchEnabled false \
+            > "$GITHUB_WORKSPACE/st-phase3b.log" 2>&1 &
+          echo $! > "$GITHUB_WORKSPACE/st-phase3b.pid"
+          timeout 90 bash -c 'until curl -fsS http://127.0.0.1:8039/ >/dev/null; do sleep 1; done'
+
+      - name: Bootstrap Echo Bench 1000 fixture
+        run: node .lab/phase3-fixture-bootstrap.mjs
+
+      - name: Run Phase 3B collect-all smoke
+        id: smoke
+        continue-on-error: true
+        run: node .lab/phase3-bridge-smoke-v6.mjs
+
+      - name: Print Phase 3B result
+        if: always()
+        run: |
+          if [ -f "$LAB_EVIDENCE_DIR/bridge-smoke-v6.json" ]; then
+            cat "$LAB_EVIDENCE_DIR/bridge-smoke-v6.json"
+          else
+            echo 'bridge-smoke-v6.json missing'
+          fi
+          echo '--- SillyTavern log tail ---'
+          tail -200 "$GITHUB_WORKSPACE/st-phase3b.log" || true
+
+      - name: Upload Phase 3B evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: phase3b-runtime-evidence
+          path: |
+            evidence/phase3-bridge-smoke-v6/
+            st-phase3b.log
+          if-no-files-found: warn
+          retention-days: 7
+
+      - name: Enforce smoke verdict
+        if: steps.smoke.outcome != 'success'
+        run: exit 1
