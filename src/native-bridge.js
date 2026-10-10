@@ -1,6 +1,7 @@
 const BRIDGE_MARK = Symbol.for('echo.performance.native-cold-bridge');
 const COMMAND_BRIDGE_MARK = Symbol.for('echo.performance.chat-jump-bridge');
 const PIN_MS = 2600;
+const TRACE_LIMIT = 160;
 const COLD_CLICK_SELECTOR = [
     '.mes_edit',
     '.mes_reasoning_header',
@@ -63,13 +64,14 @@ function commandTarget(value) {
 
 export function installNativeColdBridge(viewport, nativeGetContext) {
     if (!viewport || typeof nativeGetContext !== 'function' || !globalThis.SillyTavern) {
-        return { attachCurrent: () => {}, lifecycle: () => {}, stats: () => ({ installed: false }) };
+        return { attachCurrent: () => {}, lifecycle: () => {}, stats: () => ({ installed: false }), trace: () => [] };
     }
 
     if (globalThis.SillyTavern[BRIDGE_MARK]) return globalThis.SillyTavern[BRIDGE_MARK];
 
     const attachedShells = new WeakSet();
     const pinTimers = new Map();
+    const lifecycleTrace = [];
     const bridgeStats = {
         installed: true,
         apiMounts: 0,
@@ -84,7 +86,68 @@ export function installNativeColdBridge(viewport, nativeGetContext) {
     let commandBridgeAttempts = 0;
     let commandBridgeTimer = null;
 
-    function scheduleAfterPin(chunk) {
+    function describeActiveElement(chunk) {
+        const active = document.activeElement;
+        if (!(active instanceof Element)) return { activeElement: null, activeInChunk: false };
+        const activeInChunk = Boolean(chunk?.nodes?.some(node => node.contains(active)));
+        return {
+            activeElement: {
+                tag: active.tagName,
+                id: active.id || null,
+                className: typeof active.className === 'string' ? active.className : null,
+            },
+            activeInChunk,
+        };
+    }
+
+    function chunkEligibility(chunk) {
+        if (!chunk) return null;
+        const root = viewport.root;
+        const connected = chunk.nodes.filter(node => node.parentElement === root);
+        const rootRect = root instanceof HTMLElement ? root.getBoundingClientRect() : null;
+        const firstRect = connected[0]?.getBoundingClientRect?.() ?? null;
+        const lastRect = connected.at(-1)?.getBoundingClientRect?.() ?? null;
+        const far = Boolean(rootRect && firstRect && lastRect
+            && (lastRect.bottom < rootRect.top - 2600 || firstRect.top > rootRect.bottom + 2600));
+        const foreignParent = chunk.mounted && chunk.nodes.some(node => node.parentElement !== root);
+        const pinnedNode = chunk.nodes.some(node => viewport.pinned?.has?.(node));
+        const active = describeActiveElement(chunk);
+        return {
+            chunkId: chunk.id,
+            range: [chunk.startId, chunk.endId],
+            mounted: Boolean(chunk.mounted),
+            pinRemainingMs: Math.max(0, Number(chunk.pinUntil || 0) - performance.now()),
+            activeInChunk: active.activeInChunk,
+            activeElement: active.activeElement,
+            foreignParent,
+            pinnedNode,
+            connectedCount: connected.length,
+            far,
+            canCompact: typeof viewport.canCompactChunk === 'function' ? viewport.canCompactChunk(chunk) : null,
+            rootScrollTop: root instanceof HTMLElement ? root.scrollTop : null,
+            rootScrollHeight: root instanceof HTMLElement ? root.scrollHeight : null,
+            firstTop: firstRect?.top ?? null,
+            lastBottom: lastRect?.bottom ?? null,
+            rootTop: rootRect?.top ?? null,
+            rootBottom: rootRect?.bottom ?? null,
+        };
+    }
+
+    function pushTrace(event, { mesId = null, chunk = null, reason = null, releaseReason = null, extra = null } = {}) {
+        lifecycleTrace.push({
+            event,
+            at: performance.now(),
+            mesId: Number.isInteger(Number(mesId)) ? Number(mesId) : null,
+            chunkId: chunk?.id ?? null,
+            mountReason: reason,
+            releaseReason,
+            eligibility: chunkEligibility(chunk),
+            extra,
+        });
+        if (lifecycleTrace.length > TRACE_LIMIT) lifecycleTrace.splice(0, lifecycleTrace.length - TRACE_LIMIT);
+    }
+
+    function scheduleAfterPin(chunk, mesId = null, reason = null) {
         if (!chunk) return;
         const previous = pinTimers.get(chunk);
         if (previous !== undefined) clearTimeout(previous);
@@ -96,29 +159,62 @@ export function installNativeColdBridge(viewport, nativeGetContext) {
                 return;
             }
             pinTimers.delete(chunk);
-            if (!viewport.enabled || viewport.paused || viewport.generating) return;
+            pushTrace('release-check', { mesId, chunk, reason, releaseReason: 'pin-expired' });
+            if (!viewport.enabled || viewport.paused || viewport.generating) {
+                pushTrace('compact-skipped', {
+                    mesId,
+                    chunk,
+                    reason,
+                    releaseReason: 'viewport-state',
+                    extra: { enabled: viewport.enabled, paused: viewport.paused, generating: viewport.generating },
+                });
+                return;
+            }
             bridgeStats.deferredCompacts += 1;
+            pushTrace('compact-attempted', { mesId, chunk, reason, releaseReason: 'pin-expired' });
             viewport.scheduleCompact?.(0);
+            setTimeout(() => {
+                requestAnimationFrame(() => requestAnimationFrame(() => {
+                    pushTrace('compact-observed', {
+                        mesId,
+                        chunk,
+                        reason,
+                        releaseReason: chunk.mounted ? 'still-mounted' : 'detached',
+                        extra: { compactSucceeded: !chunk.mounted },
+                    });
+                }));
+            }, 80);
         };
 
         const delay = Math.max(24, Math.ceil(Number(chunk.pinUntil || 0) - performance.now()) + 24);
         pinTimers.set(chunk, setTimeout(run, delay));
     }
 
-    function pinChunk(mesId) {
+    function pinChunk(mesId, reason = 'temporary-mount') {
         const chunk = viewport.messageToChunk?.get?.(Number(mesId));
-        if (!chunk) return null;
+        if (!chunk) {
+            pushTrace('pin-miss', { mesId, reason });
+            return null;
+        }
         chunk.pinUntil = Math.max(Number(chunk.pinUntil || 0), performance.now() + PIN_MS);
-        scheduleAfterPin(chunk);
+        pushTrace('pin-set', { mesId, chunk, reason });
+        scheduleAfterPin(chunk, Number(mesId), reason);
         return chunk;
     }
 
     function ensure(mesId, reason) {
         const id = Number(mesId);
         if (!Number.isInteger(id) || id < 0) return null;
-        pinChunk(id);
+        const chunk = pinChunk(id, reason);
+        pushTrace('mount-requested', { mesId: id, chunk, reason });
         const node = viewport.ensureMessageMounted(id, { reason });
         if (node instanceof HTMLElement) bridgeStats.apiMounts += 1;
+        pushTrace('mount-finished', {
+            mesId: id,
+            chunk,
+            reason,
+            extra: { mounted: node instanceof HTMLElement, connected: Boolean(node?.isConnected) },
+        });
         return node;
     }
 
@@ -135,13 +231,21 @@ export function installNativeColdBridge(viewport, nativeGetContext) {
 
             event.preventDefault();
             event.stopImmediatePropagation();
-            pinChunk(mesId);
+            const reason = `cold-dom-interaction:${target.className || target.tagName}`;
+            const chunk = pinChunk(mesId, reason);
+            pushTrace('operation-started', { mesId, chunk, reason });
             const restored = viewport.ensureMessageMounted(mesId, { reason: 'cold-dom-interaction' });
-            if (!(restored instanceof HTMLElement) || !target.isConnected) return;
+            if (!(restored instanceof HTMLElement) || !target.isConnected) {
+                pushTrace('operation-finished', { mesId, chunk, reason, releaseReason: 'mount-failed' });
+                return;
+            }
 
             bridgeStats.domRedispatches += 1;
             queueMicrotask(() => {
                 if (target.isConnected) target.click();
+                requestAnimationFrame(() => requestAnimationFrame(() => {
+                    pushTrace('operation-dispatched', { mesId, chunk, reason });
+                }));
             });
         }, true);
     }
@@ -153,11 +257,16 @@ export function installNativeColdBridge(viewport, nativeGetContext) {
     }
 
     async function finalizeJump(target) {
+        const chunk = viewport.messageToChunk?.get?.(Number(target)) ?? null;
+        pushTrace('jump-finalize-started', { mesId: Number(target), chunk, reason: 'native-chat-jump' });
         await twoFrames();
         const root = viewport.root;
         if (!(root instanceof HTMLElement)) return false;
         const matches = [...root.querySelectorAll(`:scope > .mes[mesid="${target}"]`)];
-        if (matches.length !== 1) return false;
+        if (matches.length !== 1) {
+            pushTrace('jump-finalize-finished', { mesId: Number(target), chunk, reason: 'native-chat-jump', releaseReason: 'target-not-unique', extra: { count: matches.length } });
+            return false;
+        }
         const node = matches[0];
         if (!(node instanceof HTMLElement)) return false;
         if (!visibleInRoot(root, node)) {
@@ -165,7 +274,9 @@ export function installNativeColdBridge(viewport, nativeGetContext) {
             bridgeStats.jumpFallbackScrolls += 1;
             await twoFrames();
         }
-        return visibleInRoot(root, node);
+        const visible = visibleInRoot(root, node);
+        pushTrace('jump-finalize-finished', { mesId: Number(target), chunk, reason: 'native-chat-jump', extra: { visible } });
+        return visible;
     }
 
     async function installChatJumpCommandBridge() {
@@ -182,13 +293,18 @@ export function installNativeColdBridge(viewport, nativeGetContext) {
             const originalCallback = command.callback;
             command.callback = async function (args, index) {
                 const target = commandTarget(index);
+                const chunk = target === null ? null : viewport.messageToChunk?.get?.(target) ?? null;
                 if (target !== null) {
+                    pushTrace('operation-started', { mesId: target, chunk, reason: 'native-chat-jump-command' });
                     const mounted = ensure(target, 'native-chat-jump-command');
                     if (mounted instanceof HTMLElement) bridgeStats.jumpPreMounts += 1;
                 }
                 bridgeStats.commandBridgeInvocations += 1;
                 const result = await Reflect.apply(originalCallback, this, [args, index]);
-                if (target !== null) await finalizeJump(target);
+                if (target !== null) {
+                    await finalizeJump(target);
+                    pushTrace('operation-finished', { mesId: target, chunk, reason: 'native-chat-jump-command', releaseReason: 'native-callback-resolved' });
+                }
                 return result;
             };
             Object.defineProperty(command, COMMAND_BRIDGE_MARK, { value: true, configurable: false });
@@ -219,8 +335,16 @@ export function installNativeColdBridge(viewport, nativeGetContext) {
             if (typeof context.swipe.to === 'function') {
                 bridged.swipe.to = async function (event, direction, options = {}) {
                     const mesId = resolveSwipeMesId(context, event, options);
-                    if (mesId !== null) ensure(mesId, 'native-swipe');
-                    return Reflect.apply(context.swipe.to, context.swipe, [event, direction, options]);
+                    const chunk = mesId === null ? null : viewport.messageToChunk?.get?.(mesId) ?? null;
+                    if (mesId !== null) {
+                        pushTrace('operation-started', { mesId, chunk, reason: 'native-swipe' });
+                        ensure(mesId, 'native-swipe');
+                    }
+                    try {
+                        return await Reflect.apply(context.swipe.to, context.swipe, [event, direction, options]);
+                    } finally {
+                        if (mesId !== null) pushTrace('operation-finished', { mesId, chunk, reason: 'native-swipe', releaseReason: 'native-promise-settled' });
+                    }
                 };
             }
 
@@ -228,8 +352,16 @@ export function installNativeColdBridge(viewport, nativeGetContext) {
                 if (typeof context.swipe[key] !== 'function') continue;
                 bridged.swipe[key] = async function (event, options = {}) {
                     const mesId = resolveSwipeMesId(context, event, options);
-                    if (mesId !== null) ensure(mesId, `native-swipe-${key}`);
-                    return Reflect.apply(context.swipe[key], context.swipe, [event, options]);
+                    const chunk = mesId === null ? null : viewport.messageToChunk?.get?.(mesId) ?? null;
+                    if (mesId !== null) {
+                        pushTrace('operation-started', { mesId, chunk, reason: `native-swipe-${key}` });
+                        ensure(mesId, `native-swipe-${key}`);
+                    }
+                    try {
+                        return await Reflect.apply(context.swipe[key], context.swipe, [event, options]);
+                    } finally {
+                        if (mesId !== null) pushTrace('operation-finished', { mesId, chunk, reason: `native-swipe-${key}`, releaseReason: 'native-promise-settled' });
+                    }
                 };
             }
         }
@@ -252,13 +384,20 @@ export function installNativeColdBridge(viewport, nativeGetContext) {
             if (typeof context[key] !== 'function') continue;
             bridged[key] = async function (...args) {
                 const target = extractChatJumpTarget(args[0]);
+                const chunk = target === null ? null : viewport.messageToChunk?.get?.(target) ?? null;
                 if (target !== null) {
+                    pushTrace('operation-started', { mesId: target, chunk, reason: `${key}:chat-jump` });
                     const mounted = ensure(target, 'native-chat-jump-preflight');
                     if (mounted instanceof HTMLElement) bridgeStats.jumpPreMounts += 1;
                 }
-                const result = await Reflect.apply(context[key], context, args);
-                if (target !== null) await finalizeJump(target);
-                return result;
+                try {
+                    return await Reflect.apply(context[key], context, args);
+                } finally {
+                    if (target !== null) {
+                        await finalizeJump(target);
+                        pushTrace('operation-finished', { mesId: target, chunk, reason: `${key}:chat-jump`, releaseReason: 'native-promise-settled' });
+                    }
+                }
             };
         }
 
@@ -270,6 +409,8 @@ export function installNativeColdBridge(viewport, nativeGetContext) {
         if (!(input instanceof HTMLTextAreaElement) || input.id !== 'send_textarea') return;
         const target = extractChatJumpTarget(input.value);
         if (target === null) return;
+        const chunk = viewport.messageToChunk?.get?.(target) ?? null;
+        pushTrace('input-preflight', { mesId: target, chunk, reason: 'native-chat-jump-input' });
         const mounted = ensure(target, 'native-chat-jump-input');
         if (mounted instanceof HTMLElement) bridgeStats.inputPreMounts += 1;
         // Re-verify the currently registered command object after user input. Some
@@ -291,7 +432,8 @@ export function installNativeColdBridge(viewport, nativeGetContext) {
             }
             if (['CHAT_CHANGED', 'CHAT_LOADED'].includes(type)) scheduleCommandBridge(0);
         },
-        stats: () => ({ ...bridgeStats }),
+        trace: mesId => lifecycleTrace.filter(entry => mesId == null || entry.mesId === Number(mesId)).map(entry => structuredClone(entry)),
+        stats: () => ({ ...bridgeStats, traceCount: lifecycleTrace.length, traceTail: lifecycleTrace.slice(-40).map(entry => structuredClone(entry)) }),
     };
 
     globalThis.SillyTavern[BRIDGE_MARK] = bridge;
