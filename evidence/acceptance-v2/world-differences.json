@@ -1,0 +1,1304 @@
+[
+  {
+    "count": 200,
+    "mode": "off",
+    "status": "PARTIAL",
+    "nativeRegenerateLastSwipeCount": {
+      "before": 2,
+      "after": 1
+    },
+    "stateDiffCount": 256,
+    "stateDiff": [
+      {
+        "path": ".revision",
+        "before": 6,
+        "after": 5
+      },
+      {
+        "path": ".storyMemory.summaries.0.id",
+        "before": "echo_l0_195",
+        "after": "echo_l0_0"
+      },
+      {
+        "path": ".storyMemory.summaries.0.title",
+        "before": "Message 195",
+        "after": "Message 0"
+      },
+      {
+        "path": ".storyMemory.summaries.0.summary",
+        "before": "The fictional traveller recorded message 195 in the evening city.",
+        "after": "The fictional traveller recorded message 0 in the evening city."
+      },
+      {
+        "path": ".storyMemory.summaries.0.parentId",
+        "before": "",
+        "after": "summary_l1_0_11_63ty93"
+      },
+      {
+        "path": ".storyMemory.summaries.0.startMessageId",
+        "before": 195,
+        "after": 0
+      },
+      {
+        "path": ".storyMemory.summaries.0.endMessageId",
+        "before": 195,
+        "after": 0
+      },
+      {
+        "path": ".storyMemory.summaries.0.createdAt",
+        "before": "2026-10-09T15:42:56.238Z",
+        "after": "2026-10-09T15:42:14.486Z"
+      },
+      {
+        "path": ".storyMemory.summaries.1.id",
+        "before": "echo_l0_196",
+        "after": "echo_l0_1"
+      },
+      {
+        "path": ".storyMemory.summaries.1.title",
+        "before": "Message 196",
+        "after": "Message 1"
+      },
+      {
+        "path": ".storyMemory.summaries.1.summary",
+        "before": "The fictional traveller recorded message 196 in the evening city.",
+        "after": "The fictional traveller recorded message 1 in the evening city."
+      },
+      {
+        "path": ".storyMemory.summaries.1.parentId",
+        "before": "",
+        "after": "summary_l1_0_11_63ty93"
+      },
+      {
+        "path": ".storyMemory.summaries.1.startMessageId",
+        "before": 196,
+        "after": 1
+      },
+      {
+        "path": ".storyMemory.summaries.1.endMessageId",
+        "before": 196,
+        "after": 1
+      },
+      {
+        "path": ".storyMemory.summaries.1.createdAt",
+        "before": "2026-10-09T15:42:57.345Z",
+        "after": "2026-10-09T15:42:14.486Z"
+      },
+      {
+        "path": ".storyMemory.summaries.2.id",
+        "before": "echo_l0_197",
+        "after": "echo_l0_2"
+      },
+      {
+        "path": ".storyMemory.summaries.2.title",
+        "before": "Message 197",
+        "after": "Message 2"
+      },
+      {
+        "path": ".storyMemory.summaries.2.summary",
+        "before": "The fictional traveller recorded message 197 in the evening city.",
+        "after": "细节已收进上层记忆；原始正文见消息 2—2。"
+      },
+      {
+        "path": ".storyMemory.summaries.2.parentId",
+        "before": "",
+        "after": "summary_l1_0_11_63ty93"
+      },
+      {
+        "path": ".storyMemory.summaries.2.startMessageId",
+        "before": 197,
+        "after": 2
+      },
+      {
+        "path": ".storyMemory.summaries.2.endMessageId",
+        "before": 197,
+        "after": 2
+      },
+      {
+        "path": ".storyMemory.summaries.2.retentionState",
+        "before": "active",
+        "after": "compacted"
+      },
+      {
+        "path": ".storyMemory.summaries.2.compactedReason",
+        "before": "",
+        "after": "细节已由 Echo stage 概括；原始正文仍可按消息范围回看。"
+      },
+      {
+        "path": ".storyMemory.summaries.2.createdAt",
+        "before": "2026-10-09T15:42:57.345Z",
+        "after": "2026-10-09T15:42:14.486Z"
+      },
+      {
+        "path": ".storyMemory.summaries.3.id",
+        "before": "echo_l0_198",
+        "after": "echo_l0_3"
+      },
+      {
+        "path": ".storyMemory.summaries.3.title",
+        "before": "Message 198",
+        "after": "Message 3"
+      },
+      {
+        "path": ".storyMemory.summaries.3.summary",
+        "before": "The fictional traveller recorded message 198 in the evening city.",
+        "after": "细节已收进上层记忆；原始正文见消息 3—3。"
+      },
+      {
+        "path": ".storyMemory.summaries.3.parentId",
+        "before": "",
+        "after": "summary_l1_0_11_63ty93"
+      },
+      {
+        "path": ".storyMemory.summaries.3.startMessageId",
+        "before": 198,
+        "after": 3
+      },
+      {
+        "path": ".storyMemory.summaries.3.endMessageId",
+        "before": 198,
+        "after": 3
+      },
+      {
+        "path": ".storyMemory.summaries.3.retentionState",
+        "before": "active",
+        "after": "compacted"
+      },
+      {
+        "path": ".storyMemory.summaries.3.compactedReason",
+        "before": "",
+        "after": "细节已由 Echo stage 概括；原始正文仍可按消息范围回看。"
+      },
+      {
+        "path": ".storyMemory.summaries.3.createdAt",
+        "before": "2026-10-09T15:42:58.421Z",
+        "after": "2026-10-09T15:42:14.486Z"
+      },
+      {
+        "path": ".storyMemory.summaries.4.id",
+        "before": "echo_l0_199",
+        "after": "echo_l0_4"
+      },
+      {
+        "path": ".storyMemory.summaries.4.title",
+        "before": "Message 199",
+        "after": "Message 4"
+      },
+      {
+        "path": ".storyMemory.summaries.4.summary",
+        "before": "The fictional traveller recorded message 199 in the evening city.",
+        "after": "细节已收进上层记忆；原始正文见消息 4—4。"
+      },
+      {
+        "path": ".storyMemory.summaries.4.parentId",
+        "before": "",
+        "after": "summary_l1_0_11_63ty93"
+      },
+      {
+        "path": ".storyMemory.summaries.4.startMessageId",
+        "before": 199,
+        "after": 4
+      },
+      {
+        "path": ".storyMemory.summaries.4.endMessageId",
+        "before": 199,
+        "after": 4
+      },
+      {
+        "path": ".storyMemory.summaries.4.retentionState",
+        "before": "active",
+        "after": "compacted"
+      }
+    ],
+    "chatDiffCount": 0,
+    "chatDiff": [],
+    "initialIndexedThrough": 199,
+    "afterRegenIndexedThrough": 199,
+    "reloadIndexedThrough": 199
+  },
+  {
+    "count": 200,
+    "mode": "on",
+    "status": "PARTIAL",
+    "nativeRegenerateLastSwipeCount": {
+      "before": 2,
+      "after": 1
+    },
+    "stateDiffCount": 256,
+    "stateDiff": [
+      {
+        "path": ".revision",
+        "before": 6,
+        "after": 5
+      },
+      {
+        "path": ".storyMemory.summaries.0.id",
+        "before": "echo_l0_195",
+        "after": "echo_l0_0"
+      },
+      {
+        "path": ".storyMemory.summaries.0.title",
+        "before": "Message 195",
+        "after": "Message 0"
+      },
+      {
+        "path": ".storyMemory.summaries.0.summary",
+        "before": "The fictional traveller recorded message 195 in the evening city.",
+        "after": "The fictional traveller recorded message 0 in the evening city."
+      },
+      {
+        "path": ".storyMemory.summaries.0.parentId",
+        "before": "",
+        "after": "summary_l1_0_11_63ty93"
+      },
+      {
+        "path": ".storyMemory.summaries.0.startMessageId",
+        "before": 195,
+        "after": 0
+      },
+      {
+        "path": ".storyMemory.summaries.0.endMessageId",
+        "before": 195,
+        "after": 0
+      },
+      {
+        "path": ".storyMemory.summaries.0.createdAt",
+        "before": "2026-10-09T15:43:53.312Z",
+        "after": "2026-10-09T15:43:12.082Z"
+      },
+      {
+        "path": ".storyMemory.summaries.1.id",
+        "before": "echo_l0_196",
+        "after": "echo_l0_1"
+      },
+      {
+        "path": ".storyMemory.summaries.1.title",
+        "before": "Message 196",
+        "after": "Message 1"
+      },
+      {
+        "path": ".storyMemory.summaries.1.summary",
+        "before": "The fictional traveller recorded message 196 in the evening city.",
+        "after": "The fictional traveller recorded message 1 in the evening city."
+      },
+      {
+        "path": ".storyMemory.summaries.1.parentId",
+        "before": "",
+        "after": "summary_l1_0_11_63ty93"
+      },
+      {
+        "path": ".storyMemory.summaries.1.startMessageId",
+        "before": 196,
+        "after": 1
+      },
+      {
+        "path": ".storyMemory.summaries.1.endMessageId",
+        "before": 196,
+        "after": 1
+      },
+      {
+        "path": ".storyMemory.summaries.1.createdAt",
+        "before": "2026-10-09T15:43:54.386Z",
+        "after": "2026-10-09T15:43:12.082Z"
+      },
+      {
+        "path": ".storyMemory.summaries.2.id",
+        "before": "echo_l0_197",
+        "after": "echo_l0_2"
+      },
+      {
+        "path": ".storyMemory.summaries.2.title",
+        "before": "Message 197",
+        "after": "Message 2"
+      },
+      {
+        "path": ".storyMemory.summaries.2.summary",
+        "before": "The fictional traveller recorded message 197 in the evening city.",
+        "after": "细节已收进上层记忆；原始正文见消息 2—2。"
+      },
+      {
+        "path": ".storyMemory.summaries.2.parentId",
+        "before": "",
+        "after": "summary_l1_0_11_63ty93"
+      },
+      {
+        "path": ".storyMemory.summaries.2.startMessageId",
+        "before": 197,
+        "after": 2
+      },
+      {
+        "path": ".storyMemory.summaries.2.endMessageId",
+        "before": 197,
+        "after": 2
+      },
+      {
+        "path": ".storyMemory.summaries.2.retentionState",
+        "before": "active",
+        "after": "compacted"
+      },
+      {
+        "path": ".storyMemory.summaries.2.compactedReason",
+        "before": "",
+        "after": "细节已由 Echo stage 概括；原始正文仍可按消息范围回看。"
+      },
+      {
+        "path": ".storyMemory.summaries.2.createdAt",
+        "before": "2026-10-09T15:43:54.386Z",
+        "after": "2026-10-09T15:43:12.082Z"
+      },
+      {
+        "path": ".storyMemory.summaries.3.id",
+        "before": "echo_l0_198",
+        "after": "echo_l0_3"
+      },
+      {
+        "path": ".storyMemory.summaries.3.title",
+        "before": "Message 198",
+        "after": "Message 3"
+      },
+      {
+        "path": ".storyMemory.summaries.3.summary",
+        "before": "The fictional traveller recorded message 198 in the evening city.",
+        "after": "细节已收进上层记忆；原始正文见消息 3—3。"
+      },
+      {
+        "path": ".storyMemory.summaries.3.parentId",
+        "before": "",
+        "after": "summary_l1_0_11_63ty93"
+      },
+      {
+        "path": ".storyMemory.summaries.3.startMessageId",
+        "before": 198,
+        "after": 3
+      },
+      {
+        "path": ".storyMemory.summaries.3.endMessageId",
+        "before": 198,
+        "after": 3
+      },
+      {
+        "path": ".storyMemory.summaries.3.retentionState",
+        "before": "active",
+        "after": "compacted"
+      },
+      {
+        "path": ".storyMemory.summaries.3.compactedReason",
+        "before": "",
+        "after": "细节已由 Echo stage 概括；原始正文仍可按消息范围回看。"
+      },
+      {
+        "path": ".storyMemory.summaries.3.createdAt",
+        "before": "2026-10-09T15:43:55.567Z",
+        "after": "2026-10-09T15:43:12.082Z"
+      },
+      {
+        "path": ".storyMemory.summaries.4.id",
+        "before": "echo_l0_199",
+        "after": "echo_l0_4"
+      },
+      {
+        "path": ".storyMemory.summaries.4.title",
+        "before": "Message 199",
+        "after": "Message 4"
+      },
+      {
+        "path": ".storyMemory.summaries.4.summary",
+        "before": "The fictional traveller recorded message 199 in the evening city.",
+        "after": "细节已收进上层记忆；原始正文见消息 4—4。"
+      },
+      {
+        "path": ".storyMemory.summaries.4.parentId",
+        "before": "",
+        "after": "summary_l1_0_11_63ty93"
+      },
+      {
+        "path": ".storyMemory.summaries.4.startMessageId",
+        "before": 199,
+        "after": 4
+      },
+      {
+        "path": ".storyMemory.summaries.4.endMessageId",
+        "before": 199,
+        "after": 4
+      },
+      {
+        "path": ".storyMemory.summaries.4.retentionState",
+        "before": "active",
+        "after": "compacted"
+      }
+    ],
+    "chatDiffCount": 0,
+    "chatDiff": [],
+    "initialIndexedThrough": 199,
+    "afterRegenIndexedThrough": 199,
+    "reloadIndexedThrough": 199
+  },
+  {
+    "count": 500,
+    "mode": "off",
+    "status": "PARTIAL",
+    "nativeRegenerateLastSwipeCount": {
+      "before": 2,
+      "after": 1
+    },
+    "stateDiffCount": 579,
+    "stateDiff": [
+      {
+        "path": ".revision",
+        "before": 6,
+        "after": 5
+      },
+      {
+        "path": ".storyMemory.summaries.0.id",
+        "before": "echo_l0_495",
+        "after": "echo_l0_0"
+      },
+      {
+        "path": ".storyMemory.summaries.0.title",
+        "before": "Message 495",
+        "after": "Message 0"
+      },
+      {
+        "path": ".storyMemory.summaries.0.summary",
+        "before": "The fictional traveller recorded message 495 in the evening city.",
+        "after": "The fictional traveller recorded message 0 in the evening city."
+      },
+      {
+        "path": ".storyMemory.summaries.0.parentId",
+        "before": "",
+        "after": "summary_l1_0_11_63ty93"
+      },
+      {
+        "path": ".storyMemory.summaries.0.startMessageId",
+        "before": 495,
+        "after": 0
+      },
+      {
+        "path": ".storyMemory.summaries.0.endMessageId",
+        "before": 495,
+        "after": 0
+      },
+      {
+        "path": ".storyMemory.summaries.0.createdAt",
+        "before": "2026-10-09T15:46:02.129Z",
+        "after": "2026-10-09T15:44:10.984Z"
+      },
+      {
+        "path": ".storyMemory.summaries.1.id",
+        "before": "echo_l0_496",
+        "after": "echo_l0_1"
+      },
+      {
+        "path": ".storyMemory.summaries.1.title",
+        "before": "Message 496",
+        "after": "Message 1"
+      },
+      {
+        "path": ".storyMemory.summaries.1.summary",
+        "before": "The fictional traveller recorded message 496 in the evening city.",
+        "after": "The fictional traveller recorded message 1 in the evening city."
+      },
+      {
+        "path": ".storyMemory.summaries.1.parentId",
+        "before": "",
+        "after": "summary_l1_0_11_63ty93"
+      },
+      {
+        "path": ".storyMemory.summaries.1.startMessageId",
+        "before": 496,
+        "after": 1
+      },
+      {
+        "path": ".storyMemory.summaries.1.endMessageId",
+        "before": 496,
+        "after": 1
+      },
+      {
+        "path": ".storyMemory.summaries.1.createdAt",
+        "before": "2026-10-09T15:46:03.511Z",
+        "after": "2026-10-09T15:44:10.984Z"
+      },
+      {
+        "path": ".storyMemory.summaries.2.id",
+        "before": "echo_l0_497",
+        "after": "echo_l0_2"
+      },
+      {
+        "path": ".storyMemory.summaries.2.title",
+        "before": "Message 497",
+        "after": "Message 2"
+      },
+      {
+        "path": ".storyMemory.summaries.2.summary",
+        "before": "The fictional traveller recorded message 497 in the evening city.",
+        "after": "细节已收进上层记忆；原始正文见消息 2—2。"
+      },
+      {
+        "path": ".storyMemory.summaries.2.parentId",
+        "before": "",
+        "after": "summary_l1_0_11_63ty93"
+      },
+      {
+        "path": ".storyMemory.summaries.2.startMessageId",
+        "before": 497,
+        "after": 2
+      },
+      {
+        "path": ".storyMemory.summaries.2.endMessageId",
+        "before": 497,
+        "after": 2
+      },
+      {
+        "path": ".storyMemory.summaries.2.retentionState",
+        "before": "active",
+        "after": "compacted"
+      },
+      {
+        "path": ".storyMemory.summaries.2.compactedReason",
+        "before": "",
+        "after": "细节已由 Echo stage 概括；原始正文仍可按消息范围回看。"
+      },
+      {
+        "path": ".storyMemory.summaries.2.createdAt",
+        "before": "2026-10-09T15:46:03.511Z",
+        "after": "2026-10-09T15:44:10.984Z"
+      },
+      {
+        "path": ".storyMemory.summaries.3.id",
+        "before": "echo_l0_498",
+        "after": "echo_l0_3"
+      },
+      {
+        "path": ".storyMemory.summaries.3.title",
+        "before": "Message 498",
+        "after": "Message 3"
+      },
+      {
+        "path": ".storyMemory.summaries.3.summary",
+        "before": "The fictional traveller recorded message 498 in the evening city.",
+        "after": "细节已收进上层记忆；原始正文见消息 3—3。"
+      },
+      {
+        "path": ".storyMemory.summaries.3.parentId",
+        "before": "",
+        "after": "summary_l1_0_11_63ty93"
+      },
+      {
+        "path": ".storyMemory.summaries.3.startMessageId",
+        "before": 498,
+        "after": 3
+      },
+      {
+        "path": ".storyMemory.summaries.3.endMessageId",
+        "before": 498,
+        "after": 3
+      },
+      {
+        "path": ".storyMemory.summaries.3.retentionState",
+        "before": "active",
+        "after": "compacted"
+      },
+      {
+        "path": ".storyMemory.summaries.3.compactedReason",
+        "before": "",
+        "after": "细节已由 Echo stage 概括；原始正文仍可按消息范围回看。"
+      },
+      {
+        "path": ".storyMemory.summaries.3.createdAt",
+        "before": "2026-10-09T15:46:04.818Z",
+        "after": "2026-10-09T15:44:10.984Z"
+      },
+      {
+        "path": ".storyMemory.summaries.4.id",
+        "before": "echo_l0_499",
+        "after": "echo_l0_4"
+      },
+      {
+        "path": ".storyMemory.summaries.4.title",
+        "before": "Message 499",
+        "after": "Message 4"
+      },
+      {
+        "path": ".storyMemory.summaries.4.summary",
+        "before": "The fictional traveller recorded message 499 in the evening city.",
+        "after": "细节已收进上层记忆；原始正文见消息 4—4。"
+      },
+      {
+        "path": ".storyMemory.summaries.4.parentId",
+        "before": "",
+        "after": "summary_l1_0_11_63ty93"
+      },
+      {
+        "path": ".storyMemory.summaries.4.startMessageId",
+        "before": 499,
+        "after": 4
+      },
+      {
+        "path": ".storyMemory.summaries.4.endMessageId",
+        "before": 499,
+        "after": 4
+      },
+      {
+        "path": ".storyMemory.summaries.4.retentionState",
+        "before": "active",
+        "after": "compacted"
+      }
+    ],
+    "chatDiffCount": 0,
+    "chatDiff": [],
+    "initialIndexedThrough": 499,
+    "afterRegenIndexedThrough": 499,
+    "reloadIndexedThrough": 499
+  },
+  {
+    "count": 500,
+    "mode": "on",
+    "status": "PARTIAL",
+    "nativeRegenerateLastSwipeCount": {
+      "before": 2,
+      "after": 1
+    },
+    "stateDiffCount": 579,
+    "stateDiff": [
+      {
+        "path": ".revision",
+        "before": 6,
+        "after": 5
+      },
+      {
+        "path": ".storyMemory.summaries.0.id",
+        "before": "echo_l0_495",
+        "after": "echo_l0_0"
+      },
+      {
+        "path": ".storyMemory.summaries.0.title",
+        "before": "Message 495",
+        "after": "Message 0"
+      },
+      {
+        "path": ".storyMemory.summaries.0.summary",
+        "before": "The fictional traveller recorded message 495 in the evening city.",
+        "after": "The fictional traveller recorded message 0 in the evening city."
+      },
+      {
+        "path": ".storyMemory.summaries.0.parentId",
+        "before": "",
+        "after": "summary_l1_0_11_63ty93"
+      },
+      {
+        "path": ".storyMemory.summaries.0.startMessageId",
+        "before": 495,
+        "after": 0
+      },
+      {
+        "path": ".storyMemory.summaries.0.endMessageId",
+        "before": 495,
+        "after": 0
+      },
+      {
+        "path": ".storyMemory.summaries.0.createdAt",
+        "before": "2026-10-09T15:48:04.126Z",
+        "after": "2026-10-09T15:46:23.470Z"
+      },
+      {
+        "path": ".storyMemory.summaries.1.id",
+        "before": "echo_l0_496",
+        "after": "echo_l0_1"
+      },
+      {
+        "path": ".storyMemory.summaries.1.title",
+        "before": "Message 496",
+        "after": "Message 1"
+      },
+      {
+        "path": ".storyMemory.summaries.1.summary",
+        "before": "The fictional traveller recorded message 496 in the evening city.",
+        "after": "The fictional traveller recorded message 1 in the evening city."
+      },
+      {
+        "path": ".storyMemory.summaries.1.parentId",
+        "before": "",
+        "after": "summary_l1_0_11_63ty93"
+      },
+      {
+        "path": ".storyMemory.summaries.1.startMessageId",
+        "before": 496,
+        "after": 1
+      },
+      {
+        "path": ".storyMemory.summaries.1.endMessageId",
+        "before": 496,
+        "after": 1
+      },
+      {
+        "path": ".storyMemory.summaries.1.createdAt",
+        "before": "2026-10-09T15:48:05.506Z",
+        "after": "2026-10-09T15:46:23.470Z"
+      },
+      {
+        "path": ".storyMemory.summaries.2.id",
+        "before": "echo_l0_497",
+        "after": "echo_l0_2"
+      },
+      {
+        "path": ".storyMemory.summaries.2.title",
+        "before": "Message 497",
+        "after": "Message 2"
+      },
+      {
+        "path": ".storyMemory.summaries.2.summary",
+        "before": "The fictional traveller recorded message 497 in the evening city.",
+        "after": "细节已收进上层记忆；原始正文见消息 2—2。"
+      },
+      {
+        "path": ".storyMemory.summaries.2.parentId",
+        "before": "",
+        "after": "summary_l1_0_11_63ty93"
+      },
+      {
+        "path": ".storyMemory.summaries.2.startMessageId",
+        "before": 497,
+        "after": 2
+      },
+      {
+        "path": ".storyMemory.summaries.2.endMessageId",
+        "before": 497,
+        "after": 2
+      },
+      {
+        "path": ".storyMemory.summaries.2.retentionState",
+        "before": "active",
+        "after": "compacted"
+      },
+      {
+        "path": ".storyMemory.summaries.2.compactedReason",
+        "before": "",
+        "after": "细节已由 Echo stage 概括；原始正文仍可按消息范围回看。"
+      },
+      {
+        "path": ".storyMemory.summaries.2.createdAt",
+        "before": "2026-10-09T15:48:05.506Z",
+        "after": "2026-10-09T15:46:23.470Z"
+      },
+      {
+        "path": ".storyMemory.summaries.3.id",
+        "before": "echo_l0_498",
+        "after": "echo_l0_3"
+      },
+      {
+        "path": ".storyMemory.summaries.3.title",
+        "before": "Message 498",
+        "after": "Message 3"
+      },
+      {
+        "path": ".storyMemory.summaries.3.summary",
+        "before": "The fictional traveller recorded message 498 in the evening city.",
+        "after": "细节已收进上层记忆；原始正文见消息 3—3。"
+      },
+      {
+        "path": ".storyMemory.summaries.3.parentId",
+        "before": "",
+        "after": "summary_l1_0_11_63ty93"
+      },
+      {
+        "path": ".storyMemory.summaries.3.startMessageId",
+        "before": 498,
+        "after": 3
+      },
+      {
+        "path": ".storyMemory.summaries.3.endMessageId",
+        "before": 498,
+        "after": 3
+      },
+      {
+        "path": ".storyMemory.summaries.3.retentionState",
+        "before": "active",
+        "after": "compacted"
+      },
+      {
+        "path": ".storyMemory.summaries.3.compactedReason",
+        "before": "",
+        "after": "细节已由 Echo stage 概括；原始正文仍可按消息范围回看。"
+      },
+      {
+        "path": ".storyMemory.summaries.3.createdAt",
+        "before": "2026-10-09T15:48:06.794Z",
+        "after": "2026-10-09T15:46:23.470Z"
+      },
+      {
+        "path": ".storyMemory.summaries.4.id",
+        "before": "echo_l0_499",
+        "after": "echo_l0_4"
+      },
+      {
+        "path": ".storyMemory.summaries.4.title",
+        "before": "Message 499",
+        "after": "Message 4"
+      },
+      {
+        "path": ".storyMemory.summaries.4.summary",
+        "before": "The fictional traveller recorded message 499 in the evening city.",
+        "after": "细节已收进上层记忆；原始正文见消息 4—4。"
+      },
+      {
+        "path": ".storyMemory.summaries.4.parentId",
+        "before": "",
+        "after": "summary_l1_0_11_63ty93"
+      },
+      {
+        "path": ".storyMemory.summaries.4.startMessageId",
+        "before": 499,
+        "after": 4
+      },
+      {
+        "path": ".storyMemory.summaries.4.endMessageId",
+        "before": 499,
+        "after": 4
+      },
+      {
+        "path": ".storyMemory.summaries.4.retentionState",
+        "before": "active",
+        "after": "compacted"
+      }
+    ],
+    "chatDiffCount": 0,
+    "chatDiff": [],
+    "initialIndexedThrough": 499,
+    "afterRegenIndexedThrough": 499,
+    "reloadIndexedThrough": 499
+  },
+  {
+    "count": 1000,
+    "mode": "off",
+    "status": "PARTIAL",
+    "nativeRegenerateLastSwipeCount": {
+      "before": 2,
+      "after": 1
+    },
+    "stateDiffCount": 1370,
+    "stateDiff": [
+      {
+        "path": ".revision",
+        "before": 96,
+        "after": 95
+      },
+      {
+        "path": ".storyMemory.summaries.0.id",
+        "before": "echo_l0_913",
+        "after": "echo_l0_0"
+      },
+      {
+        "path": ".storyMemory.summaries.0.title",
+        "before": "Message 913",
+        "after": "Message 0"
+      },
+      {
+        "path": ".storyMemory.summaries.0.summary",
+        "before": "The fictional traveller recorded message 913 in the evening city.",
+        "after": "The fictional traveller recorded message 0 in the evening city."
+      },
+      {
+        "path": ".storyMemory.summaries.0.parentId",
+        "before": "summary_l1_913_924_1uws1ki",
+        "after": "summary_l1_0_11_63ty93"
+      },
+      {
+        "path": ".storyMemory.summaries.0.startMessageId",
+        "before": 913,
+        "after": 0
+      },
+      {
+        "path": ".storyMemory.summaries.0.endMessageId",
+        "before": 913,
+        "after": 0
+      },
+      {
+        "path": ".storyMemory.summaries.0.createdAt",
+        "before": "2026-10-09T15:52:40.137Z",
+        "after": "2026-10-09T15:48:29.608Z"
+      },
+      {
+        "path": ".storyMemory.summaries.1.id",
+        "before": "echo_l0_914",
+        "after": "echo_l0_1"
+      },
+      {
+        "path": ".storyMemory.summaries.1.title",
+        "before": "Message 914",
+        "after": "Message 1"
+      },
+      {
+        "path": ".storyMemory.summaries.1.summary",
+        "before": "The fictional traveller recorded message 914 in the evening city.",
+        "after": "The fictional traveller recorded message 1 in the evening city."
+      },
+      {
+        "path": ".storyMemory.summaries.1.parentId",
+        "before": "summary_l1_913_924_1uws1ki",
+        "after": "summary_l1_0_11_63ty93"
+      },
+      {
+        "path": ".storyMemory.summaries.1.startMessageId",
+        "before": 914,
+        "after": 1
+      },
+      {
+        "path": ".storyMemory.summaries.1.endMessageId",
+        "before": 914,
+        "after": 1
+      },
+      {
+        "path": ".storyMemory.summaries.1.createdAt",
+        "before": "2026-10-09T15:52:42.094Z",
+        "after": "2026-10-09T15:48:29.608Z"
+      },
+      {
+        "path": ".storyMemory.summaries.2.id",
+        "before": "echo_l0_915",
+        "after": "echo_l0_2"
+      },
+      {
+        "path": ".storyMemory.summaries.2.title",
+        "before": "Message 915",
+        "after": "Message 2"
+      },
+      {
+        "path": ".storyMemory.summaries.2.summary",
+        "before": "细节已收进上层记忆；原始正文见消息 915—915。",
+        "after": "细节已收进上层记忆；原始正文见消息 2—2。"
+      },
+      {
+        "path": ".storyMemory.summaries.2.parentId",
+        "before": "summary_l1_913_924_1uws1ki",
+        "after": "summary_l1_0_11_63ty93"
+      },
+      {
+        "path": ".storyMemory.summaries.2.startMessageId",
+        "before": 915,
+        "after": 2
+      },
+      {
+        "path": ".storyMemory.summaries.2.endMessageId",
+        "before": 915,
+        "after": 2
+      },
+      {
+        "path": ".storyMemory.summaries.2.createdAt",
+        "before": "2026-10-09T15:52:42.094Z",
+        "after": "2026-10-09T15:48:29.608Z"
+      },
+      {
+        "path": ".storyMemory.summaries.3.id",
+        "before": "echo_l0_916",
+        "after": "echo_l0_3"
+      },
+      {
+        "path": ".storyMemory.summaries.3.title",
+        "before": "Message 916",
+        "after": "Message 3"
+      },
+      {
+        "path": ".storyMemory.summaries.3.summary",
+        "before": "细节已收进上层记忆；原始正文见消息 916—916。",
+        "after": "细节已收进上层记忆；原始正文见消息 3—3。"
+      },
+      {
+        "path": ".storyMemory.summaries.3.parentId",
+        "before": "summary_l1_913_924_1uws1ki",
+        "after": "summary_l1_0_11_63ty93"
+      },
+      {
+        "path": ".storyMemory.summaries.3.startMessageId",
+        "before": 916,
+        "after": 3
+      },
+      {
+        "path": ".storyMemory.summaries.3.endMessageId",
+        "before": 916,
+        "after": 3
+      },
+      {
+        "path": ".storyMemory.summaries.3.createdAt",
+        "before": "2026-10-09T15:52:43.602Z",
+        "after": "2026-10-09T15:48:29.608Z"
+      },
+      {
+        "path": ".storyMemory.summaries.4.id",
+        "before": "echo_l0_917",
+        "after": "echo_l0_4"
+      },
+      {
+        "path": ".storyMemory.summaries.4.title",
+        "before": "Message 917",
+        "after": "Message 4"
+      },
+      {
+        "path": ".storyMemory.summaries.4.summary",
+        "before": "细节已收进上层记忆；原始正文见消息 917—917。",
+        "after": "细节已收进上层记忆；原始正文见消息 4—4。"
+      },
+      {
+        "path": ".storyMemory.summaries.4.parentId",
+        "before": "summary_l1_913_924_1uws1ki",
+        "after": "summary_l1_0_11_63ty93"
+      },
+      {
+        "path": ".storyMemory.summaries.4.startMessageId",
+        "before": 917,
+        "after": 4
+      },
+      {
+        "path": ".storyMemory.summaries.4.endMessageId",
+        "before": 917,
+        "after": 4
+      },
+      {
+        "path": ".storyMemory.summaries.4.createdAt",
+        "before": "2026-10-09T15:52:43.602Z",
+        "after": "2026-10-09T15:48:29.608Z"
+      },
+      {
+        "path": ".storyMemory.summaries.5.id",
+        "before": "echo_l0_918",
+        "after": "echo_l0_5"
+      },
+      {
+        "path": ".storyMemory.summaries.5.title",
+        "before": "Message 918",
+        "after": "Message 5"
+      },
+      {
+        "path": ".storyMemory.summaries.5.summary",
+        "before": "细节已收进上层记忆；原始正文见消息 918—918。",
+        "after": "细节已收进上层记忆；原始正文见消息 5—5。"
+      },
+      {
+        "path": ".storyMemory.summaries.5.parentId",
+        "before": "summary_l1_913_924_1uws1ki",
+        "after": "summary_l1_0_11_63ty93"
+      }
+    ],
+    "chatDiffCount": 0,
+    "chatDiff": [],
+    "initialIndexedThrough": 908,
+    "afterRegenIndexedThrough": 999,
+    "reloadIndexedThrough": 999
+  },
+  {
+    "count": 1000,
+    "mode": "on",
+    "status": "PARTIAL",
+    "nativeRegenerateLastSwipeCount": {
+      "before": 2,
+      "after": 1
+    },
+    "stateDiffCount": 588,
+    "stateDiff": [
+      {
+        "path": ".revision",
+        "before": 6,
+        "after": 5
+      },
+      {
+        "path": ".storyMemory.summaries.0.id",
+        "before": "echo_l0_995",
+        "after": "echo_l0_0"
+      },
+      {
+        "path": ".storyMemory.summaries.0.title",
+        "before": "Message 995",
+        "after": "Message 0"
+      },
+      {
+        "path": ".storyMemory.summaries.0.summary",
+        "before": "The fictional traveller recorded message 995 in the evening city.",
+        "after": "The fictional traveller recorded message 0 in the evening city."
+      },
+      {
+        "path": ".storyMemory.summaries.0.parentId",
+        "before": "",
+        "after": "summary_l1_0_11_63ty93"
+      },
+      {
+        "path": ".storyMemory.summaries.0.startMessageId",
+        "before": 995,
+        "after": 0
+      },
+      {
+        "path": ".storyMemory.summaries.0.endMessageId",
+        "before": 995,
+        "after": 0
+      },
+      {
+        "path": ".storyMemory.summaries.0.createdAt",
+        "before": "2026-10-09T15:58:20.996Z",
+        "after": "2026-10-09T15:54:20.062Z"
+      },
+      {
+        "path": ".storyMemory.summaries.1.id",
+        "before": "echo_l0_996",
+        "after": "echo_l0_1"
+      },
+      {
+        "path": ".storyMemory.summaries.1.title",
+        "before": "Message 996",
+        "after": "Message 1"
+      },
+      {
+        "path": ".storyMemory.summaries.1.summary",
+        "before": "The fictional traveller recorded message 996 in the evening city.",
+        "after": "The fictional traveller recorded message 1 in the evening city."
+      },
+      {
+        "path": ".storyMemory.summaries.1.parentId",
+        "before": "",
+        "after": "summary_l1_0_11_63ty93"
+      },
+      {
+        "path": ".storyMemory.summaries.1.startMessageId",
+        "before": 996,
+        "after": 1
+      },
+      {
+        "path": ".storyMemory.summaries.1.endMessageId",
+        "before": 996,
+        "after": 1
+      },
+      {
+        "path": ".storyMemory.summaries.1.createdAt",
+        "before": "2026-10-09T15:58:23.040Z",
+        "after": "2026-10-09T15:54:20.062Z"
+      },
+      {
+        "path": ".storyMemory.summaries.2.id",
+        "before": "echo_l0_997",
+        "after": "echo_l0_2"
+      },
+      {
+        "path": ".storyMemory.summaries.2.title",
+        "before": "Message 997",
+        "after": "Message 2"
+      },
+      {
+        "path": ".storyMemory.summaries.2.summary",
+        "before": "The fictional traveller recorded message 997 in the evening city.",
+        "after": "细节已收进上层记忆；原始正文见消息 2—2。"
+      },
+      {
+        "path": ".storyMemory.summaries.2.parentId",
+        "before": "",
+        "after": "summary_l1_0_11_63ty93"
+      },
+      {
+        "path": ".storyMemory.summaries.2.startMessageId",
+        "before": 997,
+        "after": 2
+      },
+      {
+        "path": ".storyMemory.summaries.2.endMessageId",
+        "before": 997,
+        "after": 2
+      },
+      {
+        "path": ".storyMemory.summaries.2.retentionState",
+        "before": "active",
+        "after": "compacted"
+      },
+      {
+        "path": ".storyMemory.summaries.2.compactedReason",
+        "before": "",
+        "after": "细节已由 Echo stage 概括；原始正文仍可按消息范围回看。"
+      },
+      {
+        "path": ".storyMemory.summaries.2.createdAt",
+        "before": "2026-10-09T15:58:23.040Z",
+        "after": "2026-10-09T15:54:20.062Z"
+      },
+      {
+        "path": ".storyMemory.summaries.3.id",
+        "before": "echo_l0_998",
+        "after": "echo_l0_3"
+      },
+      {
+        "path": ".storyMemory.summaries.3.title",
+        "before": "Message 998",
+        "after": "Message 3"
+      },
+      {
+        "path": ".storyMemory.summaries.3.summary",
+        "before": "The fictional traveller recorded message 998 in the evening city.",
+        "after": "细节已收进上层记忆；原始正文见消息 3—3。"
+      },
+      {
+        "path": ".storyMemory.summaries.3.parentId",
+        "before": "",
+        "after": "summary_l1_0_11_63ty93"
+      },
+      {
+        "path": ".storyMemory.summaries.3.startMessageId",
+        "before": 998,
+        "after": 3
+      },
+      {
+        "path": ".storyMemory.summaries.3.endMessageId",
+        "before": 998,
+        "after": 3
+      },
+      {
+        "path": ".storyMemory.summaries.3.retentionState",
+        "before": "active",
+        "after": "compacted"
+      },
+      {
+        "path": ".storyMemory.summaries.3.compactedReason",
+        "before": "",
+        "after": "细节已由 Echo stage 概括；原始正文仍可按消息范围回看。"
+      },
+      {
+        "path": ".storyMemory.summaries.3.createdAt",
+        "before": "2026-10-09T15:58:24.616Z",
+        "after": "2026-10-09T15:54:20.062Z"
+      },
+      {
+        "path": ".storyMemory.summaries.4.id",
+        "before": "echo_l0_999",
+        "after": "echo_l0_4"
+      },
+      {
+        "path": ".storyMemory.summaries.4.title",
+        "before": "Message 999",
+        "after": "Message 4"
+      },
+      {
+        "path": ".storyMemory.summaries.4.summary",
+        "before": "The fictional traveller recorded message 999 in the evening city.",
+        "after": "细节已收进上层记忆；原始正文见消息 4—4。"
+      },
+      {
+        "path": ".storyMemory.summaries.4.parentId",
+        "before": "",
+        "after": "summary_l1_0_11_63ty93"
+      },
+      {
+        "path": ".storyMemory.summaries.4.startMessageId",
+        "before": 999,
+        "after": 4
+      },
+      {
+        "path": ".storyMemory.summaries.4.endMessageId",
+        "before": 999,
+        "after": 4
+      },
+      {
+        "path": ".storyMemory.summaries.4.retentionState",
+        "before": "active",
+        "after": "compacted"
+      }
+    ],
+    "chatDiffCount": 0,
+    "chatDiff": [],
+    "initialIndexedThrough": 999,
+    "afterRegenIndexedThrough": 999,
+    "reloadIndexedThrough": 999
+  }
+]

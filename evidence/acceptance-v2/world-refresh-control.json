@@ -1,0 +1,20 @@
+{
+  "status": "PARTIAL",
+  "echoDisabledForEntireControl": true,
+  "modelSummarySeed": "Copied actual post-regeneration state from full automatic workflow, not manufactured summaries.",
+  "stateReconstructionDiffWithEchoDisabled": true,
+  "nativeChatUnchanged": true,
+  "stateCounts": {
+    "seedRevision": 6,
+    "openRevision": 5,
+    "reloadRevision": 5,
+    "seedSummaries": 5,
+    "openSummaries": 218,
+    "reloadSummaries": 218
+  },
+  "autoSettings": {
+    "memoryAutoIndexInterval": 1,
+    "autoHideArchivedFloors": true
+  },
+  "errors": []
+}

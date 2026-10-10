@@ -1,0 +1,32 @@
+{
+  "checks": [
+    "150 message shells and IDs preserved",
+    "lazy rendering leaves chat array byte-identical",
+    "lazy rendering leaves metadata byte-identical",
+    "scroll height preserved within 2px",
+    "recent 40 messages remain fully present and unconstrained",
+    "disable restores HTML and original node identity",
+    "native event consumer sees complete DOM without layout constraints",
+    "external DOM replacement is retained and releases layout constraints",
+    "iframe/custom markup/pinned shells remain attached",
+    "native historical edit updates data and displayed message",
+    "native edit cancel retains original",
+    "native historical swipe selects alternate without deleting history",
+    "swipe back restores reasoning and original history",
+    "historical reasoning expands normally",
+    "browser find restores normal layout and pauses optimization",
+    "native regeneration uses deterministic provider transport once",
+    "native regeneration retains historical messages and exits suspension",
+    "mobile viewport has no horizontal chat overflow",
+    "narrow viewport has no horizontal chat overflow",
+    "real browser wheel scroll moves through history",
+    "visible messages retain readable body after wheel scroll",
+    "saved JSONL readback retains edits, swipes, reasoning and all 150 messages",
+    "no page exceptions"
+  ],
+  "errors": [],
+  "browser": "154.0.4258.62",
+  "runtimeCommit": "8172dcd0ee672d3cd9a5e5f7af134f91a45cd2b8",
+  "worldBackstage": null,
+  "complete": true
+}

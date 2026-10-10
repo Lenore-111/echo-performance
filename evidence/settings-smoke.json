@@ -1,0 +1,13 @@
+{
+  "checks": [
+    "real settings checkbox enables lazy rendering",
+    "enabled setting survives real settings save and reload",
+    "real pause button releases constraints and updates status",
+    "real resume button re-enables display",
+    "disable persists and leaves original node display intact",
+    "no page exceptions"
+  ],
+  "errors": [],
+  "complete": true,
+  "worldHostVersion": "2.5.7"
+}

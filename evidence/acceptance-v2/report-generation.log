@@ -1,0 +1,359 @@
+{
+  "status": "PARTIAL",
+  "metrics": [
+    {
+      "count": 200,
+      "enabled": false,
+      "status": "PASS",
+      "loadMs": 802.8999999761581,
+      "domElements": 26626,
+      "chatElements": 17500,
+      "totalDomNodes": 62603,
+      "heapMiB": 41.90743923187256,
+      "heapAfterInteractionsMiB": 50.590335845947266,
+      "heapAfterReloadMiB": 64.12879943847656,
+      "scrollP95Ms": 4.5,
+      "longTasks": 3,
+      "longTaskTotalMs": 687,
+      "swipeP95Ms": 662.2000000476837,
+      "reasoningFirstMs": 49.5,
+      "reasoningRepeatMs": 15.200000047683716,
+      "saveMs": 142.10000002384186,
+      "refreshAndEnterMs": 2727.8000000715256,
+      "interactionHeapInitialMiB": 65.74469375610352,
+      "interactionHeapDeltaMiB": -15.166749000549316,
+      "reloadHeapDeltaMiB": -1.2352094650268555
+    },
+    {
+      "count": 200,
+      "enabled": true,
+      "status": "PASS",
+      "loadMs": 717.1000000238419,
+      "domElements": 26626,
+      "chatElements": 17500,
+      "totalDomNodes": 62603,
+      "heapMiB": 54.62928295135498,
+      "heapAfterInteractionsMiB": 49.40179443359375,
+      "heapAfterReloadMiB": 64.31750392913818,
+      "scrollP95Ms": 10.199999928474426,
+      "longTasks": 2,
+      "longTaskTotalMs": 561,
+      "swipeP95Ms": 544.7000000476837,
+      "reasoningFirstMs": 25.100000023841858,
+      "reasoningRepeatMs": 10.600000023841858,
+      "saveMs": 148,
+      "refreshAndEnterMs": 2733.3000000715256,
+      "interactionHeapInitialMiB": 65.19399738311768,
+      "interactionHeapDeltaMiB": -17.04749870300293,
+      "reloadHeapDeltaMiB": -0.8764934539794922
+    },
+    {
+      "count": 500,
+      "enabled": false,
+      "status": "PASS",
+      "loadMs": 1657.6000000238419,
+      "domElements": 52876,
+      "chatElements": 43750,
+      "totalDomNodes": 121553,
+      "heapMiB": 64.1053237915039,
+      "heapAfterInteractionsMiB": 71.42049884796143,
+      "heapAfterReloadMiB": 109.06913661956787,
+      "scrollP95Ms": 6.600000023841858,
+      "longTasks": 5,
+      "longTaskTotalMs": 1538,
+      "swipeP95Ms": 1293.5999999046326,
+      "reasoningFirstMs": 109.10000002384186,
+      "reasoningRepeatMs": 20.09999990463257,
+      "saveMs": 192.5,
+      "refreshAndEnterMs": 3868.2000000476837,
+      "interactionHeapInitialMiB": 70.27368259429932,
+      "interactionHeapDeltaMiB": -0.18666458129882812,
+      "reloadHeapDeltaMiB": 23.909027099609375
+    },
+    {
+      "count": 500,
+      "enabled": true,
+      "status": "PASS",
+      "loadMs": 1710.0999999046326,
+      "domElements": 52876,
+      "chatElements": 43750,
+      "totalDomNodes": 121553,
+      "heapMiB": 70.90512371063232,
+      "heapAfterInteractionsMiB": 56.68311882019043,
+      "heapAfterReloadMiB": 91.0249490737915,
+      "scrollP95Ms": 13.5,
+      "longTasks": 4,
+      "longTaskTotalMs": 1535,
+      "swipeP95Ms": 986.1999999284744,
+      "reasoningFirstMs": 32,
+      "reasoningRepeatMs": 17.200000047683716,
+      "saveMs": 195.59999990463257,
+      "refreshAndEnterMs": 3879.3000000715256,
+      "interactionHeapInitialMiB": 75.02025032043457,
+      "interactionHeapDeltaMiB": -18.33713150024414,
+      "reloadHeapDeltaMiB": 14.741632461547852
+    },
+    {
+      "count": 1000,
+      "enabled": false,
+      "status": "PASS",
+      "loadMs": 3248.5,
+      "domElements": 96626,
+      "chatElements": 87500,
+      "totalDomNodes": 219803,
+      "heapMiB": 127.9773941040039,
+      "heapAfterInteractionsMiB": 167.58661270141602,
+      "heapAfterReloadMiB": 127.25255489349365,
+      "scrollP95Ms": 14.399999976158142,
+      "longTasks": 10,
+      "longTaskTotalMs": 4218,
+      "swipeP95Ms": 2612.2000000476837,
+      "reasoningFirstMs": 211.39999997615814,
+      "reasoningRepeatMs": 43.199999928474426,
+      "saveMs": 311,
+      "refreshAndEnterMs": 5763,
+      "interactionHeapInitialMiB": 74.08162593841553,
+      "interactionHeapDeltaMiB": 37.842461585998535,
+      "reloadHeapDeltaMiB": 58.29252338409424
+    },
+    {
+      "count": 1000,
+      "enabled": true,
+      "status": "PASS",
+      "loadMs": 3407,
+      "domElements": 96626,
+      "chatElements": 87500,
+      "totalDomNodes": 219803,
+      "heapMiB": 251.94195461273193,
+      "heapAfterInteractionsMiB": 208.08436489105225,
+      "heapAfterReloadMiB": 166.09708404541016,
+      "scrollP95Ms": 28.399999976158142,
+      "longTasks": 11,
+      "longTaskTotalMs": 3800,
+      "swipeP95Ms": 2518.600000023842,
+      "reasoningFirstMs": 48.10000002384186,
+      "reasoningRepeatMs": 21.5,
+      "saveMs": 315.2999999523163,
+      "refreshAndEnterMs": 5910.400000095367,
+      "interactionHeapInitialMiB": 122.63003635406494,
+      "interactionHeapDeltaMiB": 70.80034160614014,
+      "reloadHeapDeltaMiB": 28.813060760498047
+    }
+  ],
+  "worlds": [
+    {
+      "count": 200,
+      "enabled": false,
+      "status": "PARTIAL",
+      "indexedThrough": 199,
+      "finalIndexedThrough": 199,
+      "hiddenFloors": 195,
+      "finalHiddenFloors": 195,
+      "workflowError": null,
+      "httpRequests": 50,
+      "elapsedMs": 56643,
+      "externalModelSummaryQuality": "NOT VERIFIED"
+    },
+    {
+      "count": 200,
+      "enabled": true,
+      "status": "PARTIAL",
+      "indexedThrough": 199,
+      "finalIndexedThrough": 199,
+      "hiddenFloors": 195,
+      "finalHiddenFloors": 195,
+      "workflowError": null,
+      "httpRequests": 50,
+      "elapsedMs": 56083,
+      "externalModelSummaryQuality": "NOT VERIFIED"
+    },
+    {
+      "count": 500,
+      "enabled": false,
+      "status": "PARTIAL",
+      "indexedThrough": 499,
+      "finalIndexedThrough": 499,
+      "hiddenFloors": 495,
+      "finalHiddenFloors": 495,
+      "workflowError": null,
+      "httpRequests": 116,
+      "elapsedMs": 129615,
+      "externalModelSummaryQuality": "NOT VERIFIED"
+    },
+    {
+      "count": 500,
+      "enabled": true,
+      "status": "PARTIAL",
+      "indexedThrough": 499,
+      "finalIndexedThrough": 499,
+      "hiddenFloors": 495,
+      "finalHiddenFloors": 495,
+      "workflowError": null,
+      "httpRequests": 116,
+      "elapsedMs": 119630,
+      "externalModelSummaryQuality": "NOT VERIFIED"
+    },
+    {
+      "count": 1000,
+      "enabled": false,
+      "status": "PARTIAL",
+      "indexedThrough": 908,
+      "finalIndexedThrough": 999,
+      "hiddenFloors": 904,
+      "finalHiddenFloors": 995,
+      "workflowError": "TimeoutError: page.waitForFunction: Timeout 240000ms exceeded.",
+      "httpRequests": 245,
+      "elapsedMs": 344950,
+      "externalModelSummaryQuality": "NOT VERIFIED"
+    },
+    {
+      "count": 1000,
+      "enabled": true,
+      "status": "PARTIAL",
+      "indexedThrough": 999,
+      "finalIndexedThrough": 999,
+      "hiddenFloors": 995,
+      "finalHiddenFloors": 995,
+      "workflowError": null,
+      "httpRequests": 221,
+      "elapsedMs": 269911,
+      "externalModelSummaryQuality": "NOT VERIFIED"
+    }
+  ],
+  "failures": [
+    {
+      "name": "200/off: native regen retains length and original swipe history",
+      "status": "PARTIAL",
+      "detail": null
+    },
+    {
+      "name": "200/off: swipe and archived reasoning after auto-hide",
+      "status": "PARTIAL",
+      "detail": {
+        "alternateCorrect": false,
+        "restoredLastMessage": false,
+        "archivedReasoningCorrect": true,
+        "hiddenMarkerRetained": true,
+        "initialSwipe": 0
+      }
+    },
+    {
+      "name": "200/off: refresh/re-enable preserves native data and world state",
+      "status": "PARTIAL",
+      "detail": null
+    },
+    {
+      "name": "200/on: native regen retains length and original swipe history",
+      "status": "PARTIAL",
+      "detail": null
+    },
+    {
+      "name": "200/on: swipe and archived reasoning after auto-hide",
+      "status": "PARTIAL",
+      "detail": {
+        "alternateCorrect": false,
+        "restoredLastMessage": false,
+        "archivedReasoningCorrect": true,
+        "hiddenMarkerRetained": true,
+        "initialSwipe": 0
+      }
+    },
+    {
+      "name": "200/on: refresh/re-enable preserves native data and world state",
+      "status": "PARTIAL",
+      "detail": null
+    },
+    {
+      "name": "500/off: native regen retains length and original swipe history",
+      "status": "PARTIAL",
+      "detail": null
+    },
+    {
+      "name": "500/off: swipe and archived reasoning after auto-hide",
+      "status": "PARTIAL",
+      "detail": {
+        "alternateCorrect": false,
+        "restoredLastMessage": false,
+        "archivedReasoningCorrect": true,
+        "hiddenMarkerRetained": true,
+        "initialSwipe": 0
+      }
+    },
+    {
+      "name": "500/off: refresh/re-enable preserves native data and world state",
+      "status": "PARTIAL",
+      "detail": null
+    },
+    {
+      "name": "500/on: native regen retains length and original swipe history",
+      "status": "PARTIAL",
+      "detail": null
+    },
+    {
+      "name": "500/on: swipe and archived reasoning after auto-hide",
+      "status": "PARTIAL",
+      "detail": {
+        "alternateCorrect": false,
+        "restoredLastMessage": false,
+        "archivedReasoningCorrect": true,
+        "hiddenMarkerRetained": true,
+        "initialSwipe": 0
+      }
+    },
+    {
+      "name": "500/on: refresh/re-enable preserves native data and world state",
+      "status": "PARTIAL",
+      "detail": null
+    },
+    {
+      "name": "1000/off: native regen retains length and original swipe history",
+      "status": "PARTIAL",
+      "detail": null
+    },
+    {
+      "name": "1000/off: swipe and archived reasoning after auto-hide",
+      "status": "PARTIAL",
+      "detail": {
+        "alternateCorrect": false,
+        "restoredLastMessage": false,
+        "archivedReasoningCorrect": true,
+        "hiddenMarkerRetained": true,
+        "initialSwipe": 0
+      }
+    },
+    {
+      "name": "1000/off: regen after hide preserves archived history and world core",
+      "status": "PARTIAL",
+      "detail": null
+    },
+    {
+      "name": "1000/off: refresh/re-enable preserves native data and world state",
+      "status": "PARTIAL",
+      "detail": null
+    },
+    {
+      "name": "1000/on: native regen retains length and original swipe history",
+      "status": "PARTIAL",
+      "detail": null
+    },
+    {
+      "name": "1000/on: swipe and archived reasoning after auto-hide",
+      "status": "PARTIAL",
+      "detail": {
+        "alternateCorrect": false,
+        "restoredLastMessage": false,
+        "archivedReasoningCorrect": true,
+        "hiddenMarkerRetained": true,
+        "initialSwipe": 0
+      }
+    },
+    {
+      "name": "1000/on: refresh/re-enable preserves native data and world state",
+      "status": "PARTIAL",
+      "detail": null
+    }
+  ],
+  "errors": [
+    "Error: Forbidden"
+  ]
+}

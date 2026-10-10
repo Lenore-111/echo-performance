@@ -1,0 +1,10 @@
+{
+  "name": "echo-performance",
+  "version": "0.1.0-alpha.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "check": "node --check index.js && node --check src/viewport.js && node --check .lab/benchmark.mjs",
+    "bench": "node .lab/benchmark.mjs"
+  }
+}

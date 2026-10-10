@@ -1,0 +1,2598 @@
+{
+  "status": "PARTIAL",
+  "date": "2026-10-10",
+  "reason": "Performance tradeoffs and world-state reconstruction remain; deterministic provider verifies automatic workflow, not external model summary quality.",
+  "runtimeCommit": "8172dcd0ee672d3cd9a5e5f7af134f91a45cd2b8",
+  "browser": "154.0.4258.62",
+  "stats": [
+    {
+      "count": 200,
+      "enabled": false,
+      "status": "PASS",
+      "loadMs": 802.8999999761581,
+      "domElements": 26626,
+      "chatElements": 17500,
+      "totalDomNodes": 62603,
+      "heapMiB": 41.90743923187256,
+      "heapAfterInteractionsMiB": 50.590335845947266,
+      "heapAfterReloadMiB": 64.12879943847656,
+      "scrollP95Ms": 4.5,
+      "longTasks": 3,
+      "longTaskTotalMs": 687,
+      "swipeP95Ms": 662.2000000476837,
+      "reasoningFirstMs": 49.5,
+      "reasoningRepeatMs": 15.200000047683716,
+      "saveMs": 142.10000002384186,
+      "refreshAndEnterMs": 2727.8000000715256,
+      "interactionHeapInitialMiB": 65.74469375610352,
+      "interactionHeapDeltaMiB": -15.166749000549316,
+      "reloadHeapDeltaMiB": -1.2352094650268555
+    },
+    {
+      "count": 200,
+      "enabled": true,
+      "status": "PASS",
+      "loadMs": 717.1000000238419,
+      "domElements": 26626,
+      "chatElements": 17500,
+      "totalDomNodes": 62603,
+      "heapMiB": 54.62928295135498,
+      "heapAfterInteractionsMiB": 49.40179443359375,
+      "heapAfterReloadMiB": 64.31750392913818,
+      "scrollP95Ms": 10.199999928474426,
+      "longTasks": 2,
+      "longTaskTotalMs": 561,
+      "swipeP95Ms": 544.7000000476837,
+      "reasoningFirstMs": 25.100000023841858,
+      "reasoningRepeatMs": 10.600000023841858,
+      "saveMs": 148,
+      "refreshAndEnterMs": 2733.3000000715256,
+      "interactionHeapInitialMiB": 65.19399738311768,
+      "interactionHeapDeltaMiB": -17.04749870300293,
+      "reloadHeapDeltaMiB": -0.8764934539794922
+    },
+    {
+      "count": 500,
+      "enabled": false,
+      "status": "PASS",
+      "loadMs": 1657.6000000238419,
+      "domElements": 52876,
+      "chatElements": 43750,
+      "totalDomNodes": 121553,
+      "heapMiB": 64.1053237915039,
+      "heapAfterInteractionsMiB": 71.42049884796143,
+      "heapAfterReloadMiB": 109.06913661956787,
+      "scrollP95Ms": 6.600000023841858,
+      "longTasks": 5,
+      "longTaskTotalMs": 1538,
+      "swipeP95Ms": 1293.5999999046326,
+      "reasoningFirstMs": 109.10000002384186,
+      "reasoningRepeatMs": 20.09999990463257,
+      "saveMs": 192.5,
+      "refreshAndEnterMs": 3868.2000000476837,
+      "interactionHeapInitialMiB": 70.27368259429932,
+      "interactionHeapDeltaMiB": -0.18666458129882812,
+      "reloadHeapDeltaMiB": 23.909027099609375
+    },
+    {
+      "count": 500,
+      "enabled": true,
+      "status": "PASS",
+      "loadMs": 1710.0999999046326,
+      "domElements": 52876,
+      "chatElements": 43750,
+      "totalDomNodes": 121553,
+      "heapMiB": 70.90512371063232,
+      "heapAfterInteractionsMiB": 56.68311882019043,
+      "heapAfterReloadMiB": 91.0249490737915,
+      "scrollP95Ms": 13.5,
+      "longTasks": 4,
+      "longTaskTotalMs": 1535,
+      "swipeP95Ms": 986.1999999284744,
+      "reasoningFirstMs": 32,
+      "reasoningRepeatMs": 17.200000047683716,
+      "saveMs": 195.59999990463257,
+      "refreshAndEnterMs": 3879.3000000715256,
+      "interactionHeapInitialMiB": 75.02025032043457,
+      "interactionHeapDeltaMiB": -18.33713150024414,
+      "reloadHeapDeltaMiB": 14.741632461547852
+    },
+    {
+      "count": 1000,
+      "enabled": false,
+      "status": "PASS",
+      "loadMs": 3248.5,
+      "domElements": 96626,
+      "chatElements": 87500,
+      "totalDomNodes": 219803,
+      "heapMiB": 127.9773941040039,
+      "heapAfterInteractionsMiB": 167.58661270141602,
+      "heapAfterReloadMiB": 127.25255489349365,
+      "scrollP95Ms": 14.399999976158142,
+      "longTasks": 10,
+      "longTaskTotalMs": 4218,
+      "swipeP95Ms": 2612.2000000476837,
+      "reasoningFirstMs": 211.39999997615814,
+      "reasoningRepeatMs": 43.199999928474426,
+      "saveMs": 311,
+      "refreshAndEnterMs": 5763,
+      "interactionHeapInitialMiB": 74.08162593841553,
+      "interactionHeapDeltaMiB": 37.842461585998535,
+      "reloadHeapDeltaMiB": 58.29252338409424
+    },
+    {
+      "count": 1000,
+      "enabled": true,
+      "status": "PASS",
+      "loadMs": 3407,
+      "domElements": 96626,
+      "chatElements": 87500,
+      "totalDomNodes": 219803,
+      "heapMiB": 251.94195461273193,
+      "heapAfterInteractionsMiB": 208.08436489105225,
+      "heapAfterReloadMiB": 166.09708404541016,
+      "scrollP95Ms": 28.399999976158142,
+      "longTasks": 11,
+      "longTaskTotalMs": 3800,
+      "swipeP95Ms": 2518.600000023842,
+      "reasoningFirstMs": 48.10000002384186,
+      "reasoningRepeatMs": 21.5,
+      "saveMs": 315.2999999523163,
+      "refreshAndEnterMs": 5910.400000095367,
+      "interactionHeapInitialMiB": 122.63003635406494,
+      "interactionHeapDeltaMiB": 70.80034160614014,
+      "reloadHeapDeltaMiB": 28.813060760498047
+    }
+  ],
+  "profileStats": [
+    {
+      "count": 200,
+      "enabled": false,
+      "repeat": 0,
+      "status": "PASS",
+      "profiledLoadMs": 824.3000000715256,
+      "synchronousReasoningUiMs": 33.90000021457672,
+      "reasoningUiCalls": 200,
+      "reasoningUiChars": 118000,
+      "formattingCallsOnExpand": 0,
+      "reasoningUpdateDomMs": 34.452999999999996,
+      "reasoningFormattingMs": 24.766999999999996,
+      "allMessageFormattingMs": 176.7729999999999,
+      "gcMs": 7.252999999999999,
+      "hottestSelfFrames": [
+        [
+          "(program) @ native:0",
+          356.46599999999995
+        ],
+        [
+          "(anonymous) @ http://127.0.0.1:8039/lib.js:2",
+          97.66499999999999
+        ],
+        [
+          "getPropertyValue @ native:0",
+          95.55800000000005
+        ],
+        [
+          "S.expr.pseudos.visible @ http://127.0.0.1:8039/lib/jquery-3.5.1.min.js:2",
+          87.33000000000004
+        ],
+        [
+          "(anonymous) @ http://127.0.0.1:8039/lib/jquery-3.5.1.min.js:2",
+          53.93799999999999
+        ],
+        [
+          "querySelectorAll @ native:0",
+          52.57799999999999
+        ],
+        [
+          "parseFromString @ native:0",
+          25.97
+        ],
+        [
+          "hasDisabledOrNotFocusableAncestor @ http://127.0.0.1:8039/scripts/keyboard.js:138",
+          19.794999999999998
+        ],
+        [
+          "(idle) @ native:0",
+          19.084000000000003
+        ],
+        [
+          "Ae @ http://127.0.0.1:8039/lib.js:2",
+          17.395999999999997
+        ],
+        [
+          "applyLocale @ http://127.0.0.1:8039/scripts/i18n.js:246",
+          15.903
+        ],
+        [
+          "se @ http://127.0.0.1:8039/lib/jquery-3.5.1.min.js:2",
+          13.645
+        ]
+      ]
+    },
+    {
+      "count": 200,
+      "enabled": false,
+      "repeat": 1,
+      "status": "PASS",
+      "profiledLoadMs": 742.8000000715256,
+      "synchronousReasoningUiMs": 33.700000524520874,
+      "reasoningUiCalls": 200,
+      "reasoningUiChars": 118000,
+      "formattingCallsOnExpand": 0,
+      "reasoningUpdateDomMs": 32.847,
+      "reasoningFormattingMs": 29.587000000000003,
+      "allMessageFormattingMs": 180.5169999999999,
+      "gcMs": 4.112,
+      "hottestSelfFrames": [
+        [
+          "(program) @ native:0",
+          179.27400000000003
+        ],
+        [
+          "S.expr.pseudos.visible @ http://127.0.0.1:8039/lib/jquery-3.5.1.min.js:2",
+          90.38300000000001
+        ],
+        [
+          "getPropertyValue @ native:0",
+          83.27700000000002
+        ],
+        [
+          "(anonymous) @ http://127.0.0.1:8039/lib.js:2",
+          64.418
+        ],
+        [
+          "querySelectorAll @ native:0",
+          54.780999999999985
+        ],
+        [
+          "i.helper.regexIndexOf @ http://127.0.0.1:8039/lib.js:2",
+          32.042
+        ],
+        [
+          "set innerHTML @ native:0",
+          24.983000000000004
+        ],
+        [
+          "(anonymous) @ http://127.0.0.1:8039/lib/jquery-3.5.1.min.js:2",
+          24.317
+        ],
+        [
+          "Ae @ http://127.0.0.1:8039/lib.js:2",
+          21.784999999999997
+        ],
+        [
+          "hasDisabledOrNotFocusableAncestor @ http://127.0.0.1:8039/scripts/keyboard.js:138",
+          19.803
+        ],
+        [
+          "parseFromString @ native:0",
+          19.018
+        ],
+        [
+          "getExtensionPrompt @ http://127.0.0.1:8039/script.js:3242",
+          18.127000000000002
+        ]
+      ]
+    },
+    {
+      "count": 200,
+      "enabled": false,
+      "repeat": 2,
+      "status": "PASS",
+      "profiledLoadMs": 737.1000000238419,
+      "synchronousReasoningUiMs": 32.50000023841858,
+      "reasoningUiCalls": 200,
+      "reasoningUiChars": 118000,
+      "formattingCallsOnExpand": 0,
+      "reasoningUpdateDomMs": 31.726000000000006,
+      "reasoningFormattingMs": 24.363,
+      "allMessageFormattingMs": 166.31299999999993,
+      "gcMs": 5.360999999999999,
+      "hottestSelfFrames": [
+        [
+          "(program) @ native:0",
+          188.24000000000004
+        ],
+        [
+          "(anonymous) @ http://127.0.0.1:8039/lib.js:2",
+          97.46000000000001
+        ],
+        [
+          "getPropertyValue @ native:0",
+          82.13899999999995
+        ],
+        [
+          "S.expr.pseudos.visible @ http://127.0.0.1:8039/lib/jquery-3.5.1.min.js:2",
+          78.408
+        ],
+        [
+          "querySelectorAll @ native:0",
+          52.17399999999997
+        ],
+        [
+          "(anonymous) @ http://127.0.0.1:8039/lib/jquery-3.5.1.min.js:2",
+          24.073999999999998
+        ],
+        [
+          "se @ http://127.0.0.1:8039/lib/jquery-3.5.1.min.js:2",
+          18.811999999999998
+        ],
+        [
+          "cloneNode @ native:0",
+          16.745999999999995
+        ],
+        [
+          "parseFromString @ native:0",
+          16.47
+        ],
+        [
+          "i.helper.regexIndexOf @ http://127.0.0.1:8039/lib.js:2",
+          15.929
+        ],
+        [
+          "hasDisabledOrNotFocusableAncestor @ http://127.0.0.1:8039/scripts/keyboard.js:138",
+          15.376999999999999
+        ],
+        [
+          "removeChild @ native:0",
+          13.441
+        ]
+      ]
+    },
+    {
+      "count": 200,
+      "enabled": true,
+      "repeat": 0,
+      "status": "PASS",
+      "profiledLoadMs": 752.7999999523163,
+      "synchronousReasoningUiMs": 34.90000104904175,
+      "reasoningUiCalls": 200,
+      "reasoningUiChars": 118000,
+      "formattingCallsOnExpand": 0,
+      "reasoningUpdateDomMs": 28.375000000000004,
+      "reasoningFormattingMs": 22.976,
+      "allMessageFormattingMs": 171.25200000000004,
+      "gcMs": 5.832000000000001,
+      "hottestSelfFrames": [
+        [
+          "(program) @ native:0",
+          202.70500000000007
+        ],
+        [
+          "getPropertyValue @ native:0",
+          81.07
+        ],
+        [
+          "S.expr.pseudos.visible @ http://127.0.0.1:8039/lib/jquery-3.5.1.min.js:2",
+          77.14000000000001
+        ],
+        [
+          "(anonymous) @ http://127.0.0.1:8039/lib.js:2",
+          70.357
+        ],
+        [
+          "querySelectorAll @ native:0",
+          40.589
+        ],
+        [
+          "(anonymous) @ http://127.0.0.1:8039/lib/jquery-3.5.1.min.js:2",
+          29.613999999999997
+        ],
+        [
+          "i.helper.regexIndexOf @ http://127.0.0.1:8039/lib.js:2",
+          24.658
+        ],
+        [
+          "set innerHTML @ native:0",
+          19.549999999999997
+        ],
+        [
+          "cloneNode @ native:0",
+          16.791
+        ],
+        [
+          "Ae @ http://127.0.0.1:8039/lib.js:2",
+          15.712999999999997
+        ],
+        [
+          "getExtensionPrompt @ http://127.0.0.1:8039/script.js:3242",
+          15.702
+        ],
+        [
+          "removeChild @ native:0",
+          15.123999999999999
+        ]
+      ]
+    },
+    {
+      "count": 200,
+      "enabled": true,
+      "repeat": 1,
+      "status": "PASS",
+      "profiledLoadMs": 814.7999999523163,
+      "synchronousReasoningUiMs": 39.99999940395355,
+      "reasoningUiCalls": 200,
+      "reasoningUiChars": 118000,
+      "formattingCallsOnExpand": 0,
+      "reasoningUpdateDomMs": 40.418,
+      "reasoningFormattingMs": 30.845,
+      "allMessageFormattingMs": 193.32600000000005,
+      "gcMs": 6.770999999999999,
+      "hottestSelfFrames": [
+        [
+          "(program) @ native:0",
+          203.43
+        ],
+        [
+          "getPropertyValue @ native:0",
+          91.81400000000004
+        ],
+        [
+          "(anonymous) @ http://127.0.0.1:8039/lib.js:2",
+          89.55399999999999
+        ],
+        [
+          "S.expr.pseudos.visible @ http://127.0.0.1:8039/lib/jquery-3.5.1.min.js:2",
+          85.965
+        ],
+        [
+          "querySelectorAll @ native:0",
+          52.24899999999999
+        ],
+        [
+          "(anonymous) @ http://127.0.0.1:8039/lib/jquery-3.5.1.min.js:2",
+          30.924000000000003
+        ],
+        [
+          "se @ http://127.0.0.1:8039/lib/jquery-3.5.1.min.js:2",
+          21.848999999999997
+        ],
+        [
+          "(idle) @ native:0",
+          18.626000000000005
+        ],
+        [
+          "i.helper.regexIndexOf @ http://127.0.0.1:8039/lib.js:2",
+          18.485
+        ],
+        [
+          "getExtensionPrompt @ http://127.0.0.1:8039/script.js:3242",
+          16.603
+        ],
+        [
+          "parseFromString @ native:0",
+          16.203
+        ],
+        [
+          "removeChild @ native:0",
+          16.117
+        ]
+      ]
+    },
+    {
+      "count": 200,
+      "enabled": true,
+      "repeat": 2,
+      "status": "PASS",
+      "profiledLoadMs": 847.3999999761581,
+      "synchronousReasoningUiMs": 34.89999997615814,
+      "reasoningUiCalls": 200,
+      "reasoningUiChars": 118000,
+      "formattingCallsOnExpand": 0,
+      "reasoningUpdateDomMs": 29.256999999999998,
+      "reasoningFormattingMs": 26.27499999999999,
+      "allMessageFormattingMs": 179.58900000000014,
+      "gcMs": 5.197,
+      "hottestSelfFrames": [
+        [
+          "(program) @ native:0",
+          234.14999999999986
+        ],
+        [
+          "getPropertyValue @ native:0",
+          85.51600000000002
+        ],
+        [
+          "S.expr.pseudos.visible @ http://127.0.0.1:8039/lib/jquery-3.5.1.min.js:2",
+          84.87599999999998
+        ],
+        [
+          "(anonymous) @ http://127.0.0.1:8039/lib.js:2",
+          84.71099999999998
+        ],
+        [
+          "querySelectorAll @ native:0",
+          47.69799999999999
+        ],
+        [
+          "(anonymous) @ http://127.0.0.1:8039/lib/jquery-3.5.1.min.js:2",
+          38.984
+        ],
+        [
+          "parseFromString @ native:0",
+          24.361
+        ],
+        [
+          "i.helper.regexIndexOf @ http://127.0.0.1:8039/lib.js:2",
+          22.778999999999996
+        ],
+        [
+          "(idle) @ native:0",
+          21.528999999999996
+        ],
+        [
+          "cloneNode @ native:0",
+          19.233
+        ],
+        [
+          "hasDisabledOrNotFocusableAncestor @ http://127.0.0.1:8039/scripts/keyboard.js:138",
+          15.669
+        ],
+        [
+          "se @ http://127.0.0.1:8039/lib/jquery-3.5.1.min.js:2",
+          15.466999999999997
+        ]
+      ]
+    },
+    {
+      "count": 500,
+      "enabled": false,
+      "repeat": 0,
+      "status": "PASS",
+      "profiledLoadMs": 1816.3000000715256,
+      "synchronousReasoningUiMs": 82.09999942779541,
+      "reasoningUiCalls": 500,
+      "reasoningUiChars": 295000,
+      "formattingCallsOnExpand": 0,
+      "reasoningUpdateDomMs": 91.87799999999999,
+      "reasoningFormattingMs": 73.47099999999999,
+      "allMessageFormattingMs": 413.44099999999975,
+      "gcMs": 27.517,
+      "hottestSelfFrames": [
+        [
+          "(program) @ native:0",
+          412.9159999999992
+        ],
+        [
+          "S.expr.pseudos.visible @ http://127.0.0.1:8039/lib/jquery-3.5.1.min.js:2",
+          232.76800000000011
+        ],
+        [
+          "getPropertyValue @ native:0",
+          198.52900000000008
+        ],
+        [
+          "(anonymous) @ http://127.0.0.1:8039/lib.js:2",
+          196.89600000000004
+        ],
+        [
+          "querySelectorAll @ native:0",
+          106.18400000000001
+        ],
+        [
+          "i.helper.regexIndexOf @ http://127.0.0.1:8039/lib.js:2",
+          54.047999999999995
+        ],
+        [
+          "(anonymous) @ http://127.0.0.1:8039/lib/jquery-3.5.1.min.js:2",
+          52.822
+        ],
+        [
+          "makeKeyboardInteractable @ http://127.0.0.1:8039/scripts/keyboard.js:121",
+          52.18200000000001
+        ],
+        [
+          "parseFromString @ native:0",
+          42.295
+        ],
+        [
+          "set innerHTML @ native:0",
+          38.943999999999996
+        ],
+        [
+          "setAttribute @ native:0",
+          38.21699999999999
+        ],
+        [
+          "Ae @ http://127.0.0.1:8039/lib.js:2",
+          36.049
+        ]
+      ]
+    },
+    {
+      "count": 500,
+      "enabled": false,
+      "repeat": 1,
+      "status": "PASS",
+      "profiledLoadMs": 1766.5,
+      "synchronousReasoningUiMs": 83.29999935626984,
+      "reasoningUiCalls": 500,
+      "reasoningUiChars": 295000,
+      "formattingCallsOnExpand": 0,
+      "reasoningUpdateDomMs": 79.03199999999998,
+      "reasoningFormattingMs": 65.91899999999998,
+      "allMessageFormattingMs": 405.2279999999998,
+      "gcMs": 13.623000000000001,
+      "hottestSelfFrames": [
+        [
+          "(program) @ native:0",
+          389.4459999999999
+        ],
+        [
+          "S.expr.pseudos.visible @ http://127.0.0.1:8039/lib/jquery-3.5.1.min.js:2",
+          196.524
+        ],
+        [
+          "getPropertyValue @ native:0",
+          193.1700000000001
+        ],
+        [
+          "(anonymous) @ http://127.0.0.1:8039/lib.js:2",
+          187.21700000000007
+        ],
+        [
+          "querySelectorAll @ native:0",
+          138.14800000000002
+        ],
+        [
+          "(anonymous) @ http://127.0.0.1:8039/lib/jquery-3.5.1.min.js:2",
+          56.89700000000001
+        ],
+        [
+          "makeKeyboardInteractable @ http://127.0.0.1:8039/scripts/keyboard.js:121",
+          56.54400000000001
+        ],
+        [
+          "i.helper.regexIndexOf @ http://127.0.0.1:8039/lib.js:2",
+          49.139999999999986
+        ],
+        [
+          "cloneNode @ native:0",
+          45.915999999999976
+        ],
+        [
+          "Ae @ http://127.0.0.1:8039/lib.js:2",
+          40.486000000000004
+        ],
+        [
+          "set innerHTML @ native:0",
+          37.96999999999999
+        ],
+        [
+          "parseFromString @ native:0",
+          36.16
+        ]
+      ]
+    },
+    {
+      "count": 500,
+      "enabled": false,
+      "repeat": 2,
+      "status": "PASS",
+      "profiledLoadMs": 1716.2999999523163,
+      "synchronousReasoningUiMs": 83.40000092983246,
+      "reasoningUiCalls": 500,
+      "reasoningUiChars": 295000,
+      "formattingCallsOnExpand": 0,
+      "reasoningUpdateDomMs": 82.81300000000002,
+      "reasoningFormattingMs": 64.72499999999998,
+      "allMessageFormattingMs": 408.69999999999993,
+      "gcMs": 10.404,
+      "hottestSelfFrames": [
+        [
+          "(program) @ native:0",
+          345.71000000000015
+        ],
+        [
+          "S.expr.pseudos.visible @ http://127.0.0.1:8039/lib/jquery-3.5.1.min.js:2",
+          194.02299999999985
+        ],
+        [
+          "getPropertyValue @ native:0",
+          193.65400000000002
+        ],
+        [
+          "(anonymous) @ http://127.0.0.1:8039/lib.js:2",
+          163.12
+        ],
+        [
+          "querySelectorAll @ native:0",
+          104.891
+        ],
+        [
+          "i.helper.regexIndexOf @ http://127.0.0.1:8039/lib.js:2",
+          65.36000000000001
+        ],
+        [
+          "(anonymous) @ http://127.0.0.1:8039/lib/jquery-3.5.1.min.js:2",
+          50.376
+        ],
+        [
+          "hasDisabledOrNotFocusableAncestor @ http://127.0.0.1:8039/scripts/keyboard.js:138",
+          37.263
+        ],
+        [
+          "Ae @ http://127.0.0.1:8039/lib.js:2",
+          32.676
+        ],
+        [
+          "cloneNode @ native:0",
+          32.230000000000004
+        ],
+        [
+          "set innerHTML @ native:0",
+          32.102
+        ],
+        [
+          "parseFromString @ native:0",
+          30.838999999999995
+        ]
+      ]
+    },
+    {
+      "count": 500,
+      "enabled": true,
+      "repeat": 0,
+      "status": "PASS",
+      "profiledLoadMs": 1798.6999999284744,
+      "synchronousReasoningUiMs": 84.00000083446503,
+      "reasoningUiCalls": 500,
+      "reasoningUiChars": 295000,
+      "formattingCallsOnExpand": 0,
+      "reasoningUpdateDomMs": 71.48699999999998,
+      "reasoningFormattingMs": 59.65999999999999,
+      "allMessageFormattingMs": 424.7470000000002,
+      "gcMs": 12.035,
+      "hottestSelfFrames": [
+        [
+          "(program) @ native:0",
+          362.80999999999983
+        ],
+        [
+          "S.expr.pseudos.visible @ http://127.0.0.1:8039/lib/jquery-3.5.1.min.js:2",
+          199.31099999999995
+        ],
+        [
+          "getPropertyValue @ native:0",
+          191.8369999999999
+        ],
+        [
+          "(anonymous) @ http://127.0.0.1:8039/lib.js:2",
+          179.6859999999999
+        ],
+        [
+          "querySelectorAll @ native:0",
+          114.73100000000005
+        ],
+        [
+          "i.helper.regexIndexOf @ http://127.0.0.1:8039/lib.js:2",
+          69.05200000000002
+        ],
+        [
+          "makeKeyboardInteractable @ http://127.0.0.1:8039/scripts/keyboard.js:121",
+          59.986999999999995
+        ],
+        [
+          "(anonymous) @ http://127.0.0.1:8039/lib/jquery-3.5.1.min.js:2",
+          56.779999999999994
+        ],
+        [
+          "parseFromString @ native:0",
+          46.315
+        ],
+        [
+          "cloneNode @ native:0",
+          37.855
+        ],
+        [
+          "setAttribute @ native:0",
+          35.528
+        ],
+        [
+          "(idle) @ native:0",
+          32.678999999999995
+        ]
+      ]
+    },
+    {
+      "count": 500,
+      "enabled": true,
+      "repeat": 1,
+      "status": "PASS",
+      "profiledLoadMs": 2040.6999999284744,
+      "synchronousReasoningUiMs": 89.89999961853027,
+      "reasoningUiCalls": 500,
+      "reasoningUiChars": 295000,
+      "formattingCallsOnExpand": 0,
+      "reasoningUpdateDomMs": 80.19299999999998,
+      "reasoningFormattingMs": 68.583,
+      "allMessageFormattingMs": 437.4160000000007,
+      "gcMs": 48.00400000000001,
+      "hottestSelfFrames": [
+        [
+          "(program) @ native:0",
+          398.7599999999997
+        ],
+        [
+          "getPropertyValue @ native:0",
+          249.5980000000001
+        ],
+        [
+          "S.expr.pseudos.visible @ http://127.0.0.1:8039/lib/jquery-3.5.1.min.js:2",
+          204.01699999999994
+        ],
+        [
+          "(anonymous) @ http://127.0.0.1:8039/lib.js:2",
+          175.13599999999997
+        ],
+        [
+          "querySelectorAll @ native:0",
+          137.77000000000004
+        ],
+        [
+          "(anonymous) @ http://127.0.0.1:8039/lib/jquery-3.5.1.min.js:2",
+          67.16699999999999
+        ],
+        [
+          "parseFromString @ native:0",
+          60.51100000000002
+        ],
+        [
+          "i.helper.regexIndexOf @ http://127.0.0.1:8039/lib.js:2",
+          55.615
+        ],
+        [
+          "(garbage collector) @ native:0",
+          48.00400000000001
+        ],
+        [
+          "hasDisabledOrNotFocusableAncestor @ http://127.0.0.1:8039/scripts/keyboard.js:138",
+          46.827
+        ],
+        [
+          "cloneNode @ native:0",
+          45.441
+        ],
+        [
+          "setAttribute @ native:0",
+          42.92399999999999
+        ]
+      ]
+    },
+    {
+      "count": 500,
+      "enabled": true,
+      "repeat": 2,
+      "status": "PASS",
+      "profiledLoadMs": 1824.1999999284744,
+      "synchronousReasoningUiMs": 82.49999976158142,
+      "reasoningUiCalls": 500,
+      "reasoningUiChars": 295000,
+      "formattingCallsOnExpand": 0,
+      "reasoningUpdateDomMs": 82.94699999999999,
+      "reasoningFormattingMs": 64.762,
+      "allMessageFormattingMs": 398.32400000000035,
+      "gcMs": 36.941,
+      "hottestSelfFrames": [
+        [
+          "(program) @ native:0",
+          368.6709999999998
+        ],
+        [
+          "S.expr.pseudos.visible @ http://127.0.0.1:8039/lib/jquery-3.5.1.min.js:2",
+          208.5439999999999
+        ],
+        [
+          "getPropertyValue @ native:0",
+          199.87500000000014
+        ],
+        [
+          "(anonymous) @ http://127.0.0.1:8039/lib.js:2",
+          167.65099999999995
+        ],
+        [
+          "querySelectorAll @ native:0",
+          124.14699999999996
+        ],
+        [
+          "i.helper.regexIndexOf @ http://127.0.0.1:8039/lib.js:2",
+          52.12299999999998
+        ],
+        [
+          "hasDisabledOrNotFocusableAncestor @ http://127.0.0.1:8039/scripts/keyboard.js:138",
+          48.645
+        ],
+        [
+          "(anonymous) @ http://127.0.0.1:8039/lib/jquery-3.5.1.min.js:2",
+          47.958000000000006
+        ],
+        [
+          "cloneNode @ native:0",
+          40.760999999999996
+        ],
+        [
+          "parseFromString @ native:0",
+          39.135999999999996
+        ],
+        [
+          "(garbage collector) @ native:0",
+          36.941
+        ],
+        [
+          "set innerHTML @ native:0",
+          36.486
+        ]
+      ]
+    },
+    {
+      "count": 1000,
+      "enabled": false,
+      "repeat": 0,
+      "status": "PASS",
+      "profiledLoadMs": 3767.600000023842,
+      "synchronousReasoningUiMs": 193.59999907016754,
+      "reasoningUiCalls": 1000,
+      "reasoningUiChars": 590000,
+      "formattingCallsOnExpand": 0,
+      "reasoningUpdateDomMs": 180.39100000000002,
+      "reasoningFormattingMs": 151.97700000000006,
+      "allMessageFormattingMs": 876.9810000000008,
+      "gcMs": 54.352000000000004,
+      "hottestSelfFrames": [
+        [
+          "(program) @ native:0",
+          756.2370000000005
+        ],
+        [
+          "z @ http://127.0.0.1:8039/lib/jquery.transit.min.js:1",
+          447.6749999999997
+        ],
+        [
+          "getPropertyValue @ native:0",
+          391.9360000000003
+        ],
+        [
+          "(anonymous) @ http://127.0.0.1:8039/lib.js:2",
+          377.98700000000036
+        ],
+        [
+          "querySelectorAll @ native:0",
+          345.33300000000025
+        ],
+        [
+          "parseFromString @ native:0",
+          121.755
+        ],
+        [
+          "(anonymous) @ http://127.0.0.1:8039/lib/jquery-3.5.1.min.js:2",
+          110.12600000000003
+        ],
+        [
+          "i.helper.regexIndexOf @ http://127.0.0.1:8039/lib.js:2",
+          101.43400000000003
+        ],
+        [
+          "hasDisabledOrNotFocusableAncestor @ http://127.0.0.1:8039/scripts/keyboard.js:138",
+          84.24500000000002
+        ],
+        [
+          "set innerHTML @ native:0",
+          81.05200000000002
+        ],
+        [
+          "cloneNode @ native:0",
+          72.49000000000001
+        ],
+        [
+          "se @ http://127.0.0.1:8039/lib/jquery-3.5.1.min.js:2",
+          63.72099999999999
+        ]
+      ]
+    },
+    {
+      "count": 1000,
+      "enabled": false,
+      "repeat": 1,
+      "status": "PASS",
+      "profiledLoadMs": 3665.600000023842,
+      "synchronousReasoningUiMs": 185.50000143051147,
+      "reasoningUiCalls": 1000,
+      "reasoningUiChars": 590000,
+      "formattingCallsOnExpand": 0,
+      "reasoningUpdateDomMs": 192.013,
+      "reasoningFormattingMs": 156.03599999999992,
+      "allMessageFormattingMs": 897.8749999999998,
+      "gcMs": 21.549999999999997,
+      "hottestSelfFrames": [
+        [
+          "(program) @ native:0",
+          693.356
+        ],
+        [
+          "z @ http://127.0.0.1:8039/lib/jquery.transit.min.js:1",
+          398.78399999999976
+        ],
+        [
+          "getPropertyValue @ native:0",
+          387.5319999999996
+        ],
+        [
+          "(anonymous) @ http://127.0.0.1:8039/lib.js:2",
+          367.8259999999999
+        ],
+        [
+          "querySelectorAll @ native:0",
+          337.21
+        ],
+        [
+          "i.helper.regexIndexOf @ http://127.0.0.1:8039/lib.js:2",
+          109.90000000000002
+        ],
+        [
+          "hasDisabledOrNotFocusableAncestor @ http://127.0.0.1:8039/scripts/keyboard.js:138",
+          104.32799999999996
+        ],
+        [
+          "(anonymous) @ http://127.0.0.1:8039/lib/jquery-3.5.1.min.js:2",
+          100.17599999999993
+        ],
+        [
+          "parseFromString @ native:0",
+          93.605
+        ],
+        [
+          "Ae @ http://127.0.0.1:8039/lib.js:2",
+          83.90500000000002
+        ],
+        [
+          "setAttribute @ native:0",
+          78.46100000000001
+        ],
+        [
+          "cloneNode @ native:0",
+          71.368
+        ]
+      ]
+    },
+    {
+      "count": 1000,
+      "enabled": false,
+      "repeat": 2,
+      "status": "PASS",
+      "profiledLoadMs": 3857.399999976158,
+      "synchronousReasoningUiMs": 187.50000071525574,
+      "reasoningUiCalls": 1000,
+      "reasoningUiChars": 590000,
+      "formattingCallsOnExpand": 0,
+      "reasoningUpdateDomMs": 172.64199999999994,
+      "reasoningFormattingMs": 141.908,
+      "allMessageFormattingMs": 903.3999999999993,
+      "gcMs": 61.64899999999998,
+      "hottestSelfFrames": [
+        [
+          "(program) @ native:0",
+          697.7840000000003
+        ],
+        [
+          "z @ http://127.0.0.1:8039/lib/jquery.transit.min.js:1",
+          446.10300000000035
+        ],
+        [
+          "getPropertyValue @ native:0",
+          437.296
+        ],
+        [
+          "querySelectorAll @ native:0",
+          377.16800000000006
+        ],
+        [
+          "(anonymous) @ http://127.0.0.1:8039/lib.js:2",
+          334.71299999999997
+        ],
+        [
+          "i.helper.regexIndexOf @ http://127.0.0.1:8039/lib.js:2",
+          139.85400000000004
+        ],
+        [
+          "makeKeyboardInteractable @ http://127.0.0.1:8039/scripts/keyboard.js:121",
+          126.09100000000002
+        ],
+        [
+          "(anonymous) @ http://127.0.0.1:8039/lib/jquery-3.5.1.min.js:2",
+          112.88399999999999
+        ],
+        [
+          "parseFromString @ native:0",
+          100.75900000000001
+        ],
+        [
+          "setAttribute @ native:0",
+          83.32199999999999
+        ],
+        [
+          "cloneNode @ native:0",
+          74.54700000000003
+        ],
+        [
+          "se @ http://127.0.0.1:8039/lib/jquery-3.5.1.min.js:2",
+          68.482
+        ]
+      ]
+    },
+    {
+      "count": 1000,
+      "enabled": true,
+      "repeat": 0,
+      "status": "PASS",
+      "profiledLoadMs": 3659.5,
+      "synchronousReasoningUiMs": 179.39999914169312,
+      "reasoningUiCalls": 1000,
+      "reasoningUiChars": 590000,
+      "formattingCallsOnExpand": 0,
+      "reasoningUpdateDomMs": 146.72299999999998,
+      "reasoningFormattingMs": 121.213,
+      "allMessageFormattingMs": 876.804,
+      "gcMs": 20.526,
+      "hottestSelfFrames": [
+        [
+          "(program) @ native:0",
+          610.7629999999995
+        ],
+        [
+          "getPropertyValue @ native:0",
+          398.6059999999996
+        ],
+        [
+          "z @ http://127.0.0.1:8039/lib/jquery.transit.min.js:1",
+          382.96999999999997
+        ],
+        [
+          "querySelectorAll @ native:0",
+          378.87199999999984
+        ],
+        [
+          "(anonymous) @ http://127.0.0.1:8039/lib.js:2",
+          367.55199999999974
+        ],
+        [
+          "(anonymous) @ http://127.0.0.1:8039/lib/jquery-3.5.1.min.js:2",
+          111.18599999999999
+        ],
+        [
+          "i.helper.regexIndexOf @ http://127.0.0.1:8039/lib.js:2",
+          108.61200000000004
+        ],
+        [
+          "parseFromString @ native:0",
+          84.73299999999999
+        ],
+        [
+          "Ae @ http://127.0.0.1:8039/lib.js:2",
+          76.192
+        ],
+        [
+          "hasDisabledOrNotFocusableAncestor @ http://127.0.0.1:8039/scripts/keyboard.js:138",
+          73.934
+        ],
+        [
+          "set innerHTML @ native:0",
+          73.06000000000002
+        ],
+        [
+          "setAttribute @ native:0",
+          64.427
+        ]
+      ]
+    },
+    {
+      "count": 1000,
+      "enabled": true,
+      "repeat": 1,
+      "status": "PASS",
+      "profiledLoadMs": 3708.2000000476837,
+      "synchronousReasoningUiMs": 259.69999980926514,
+      "reasoningUiCalls": 1000,
+      "reasoningUiChars": 590000,
+      "formattingCallsOnExpand": 0,
+      "reasoningUpdateDomMs": 170.148,
+      "reasoningFormattingMs": 149.32500000000002,
+      "allMessageFormattingMs": 922.292999999999,
+      "gcMs": 96.51399999999998,
+      "hottestSelfFrames": [
+        [
+          "(program) @ native:0",
+          583.2710000000003
+        ],
+        [
+          "z @ http://127.0.0.1:8039/lib/jquery.transit.min.js:1",
+          410.4629999999998
+        ],
+        [
+          "getPropertyValue @ native:0",
+          396.243
+        ],
+        [
+          "(anonymous) @ http://127.0.0.1:8039/lib.js:2",
+          372.8800000000002
+        ],
+        [
+          "querySelectorAll @ native:0",
+          369.89699999999976
+        ],
+        [
+          "i.helper.regexIndexOf @ http://127.0.0.1:8039/lib.js:2",
+          122.85100000000004
+        ],
+        [
+          "parseFromString @ native:0",
+          115.44000000000003
+        ],
+        [
+          "(garbage collector) @ native:0",
+          96.51399999999998
+        ],
+        [
+          "(anonymous) @ http://127.0.0.1:8039/lib/jquery-3.5.1.min.js:2",
+          91.53199999999997
+        ],
+        [
+          "hasDisabledOrNotFocusableAncestor @ http://127.0.0.1:8039/scripts/keyboard.js:138",
+          82.216
+        ],
+        [
+          "setAttribute @ native:0",
+          73.39399999999999
+        ],
+        [
+          "cloneNode @ native:0",
+          70.68499999999999
+        ]
+      ]
+    },
+    {
+      "count": 1000,
+      "enabled": true,
+      "repeat": 2,
+      "status": "PASS",
+      "profiledLoadMs": 3728.100000023842,
+      "synchronousReasoningUiMs": 188.9000016450882,
+      "reasoningUiCalls": 1000,
+      "reasoningUiChars": 590000,
+      "formattingCallsOnExpand": 0,
+      "reasoningUpdateDomMs": 181.57799999999997,
+      "reasoningFormattingMs": 152.25200000000004,
+      "allMessageFormattingMs": 885.2610000000003,
+      "gcMs": 106.36200000000002,
+      "hottestSelfFrames": [
+        [
+          "(program) @ native:0",
+          542.7629999999997
+        ],
+        [
+          "getPropertyValue @ native:0",
+          439.65399999999954
+        ],
+        [
+          "z @ http://127.0.0.1:8039/lib/jquery.transit.min.js:1",
+          418.4179999999998
+        ],
+        [
+          "querySelectorAll @ native:0",
+          354.655
+        ],
+        [
+          "(anonymous) @ http://127.0.0.1:8039/lib.js:2",
+          331.9699999999999
+        ],
+        [
+          "i.helper.regexIndexOf @ http://127.0.0.1:8039/lib.js:2",
+          123.55499999999996
+        ],
+        [
+          "(garbage collector) @ native:0",
+          106.36200000000002
+        ],
+        [
+          "(anonymous) @ http://127.0.0.1:8039/lib/jquery-3.5.1.min.js:2",
+          100.102
+        ],
+        [
+          "hasDisabledOrNotFocusableAncestor @ http://127.0.0.1:8039/scripts/keyboard.js:138",
+          99.22400000000002
+        ],
+        [
+          "set innerHTML @ native:0",
+          86.76400000000004
+        ],
+        [
+          "parseFromString @ native:0",
+          85.519
+        ],
+        [
+          "Ae @ http://127.0.0.1:8039/lib.js:2",
+          82.36300000000001
+        ]
+      ]
+    }
+  ],
+  "worldStats": [
+    {
+      "count": 200,
+      "enabled": false,
+      "status": "PARTIAL",
+      "indexedThrough": 199,
+      "finalIndexedThrough": 199,
+      "hiddenFloors": 195,
+      "finalHiddenFloors": 195,
+      "workflowError": null,
+      "httpRequests": 50,
+      "elapsedMs": 56643,
+      "checks": [
+        {
+          "name": "200/off: automatic history requests submitted",
+          "status": "PASS",
+          "detail": null
+        },
+        {
+          "name": "200/off: automatic hide has archived coverage and keeps recent five",
+          "status": "PASS",
+          "detail": null
+        },
+        {
+          "name": "200/off: hide preserves original history/swipes/reasoning",
+          "status": "PASS",
+          "detail": null
+        },
+        {
+          "name": "200/off: archive does not advance world or mutate people/events",
+          "status": "PASS",
+          "detail": null
+        },
+        {
+          "name": "200/off: native regen retains length and original swipe history",
+          "status": "PARTIAL",
+          "detail": null
+        },
+        {
+          "name": "200/off: swipe and archived reasoning after auto-hide",
+          "status": "PARTIAL",
+          "detail": {
+            "alternateCorrect": false,
+            "restoredLastMessage": false,
+            "archivedReasoningCorrect": true,
+            "hiddenMarkerRetained": true,
+            "initialSwipe": 0
+          }
+        },
+        {
+          "name": "200/off: regen after hide preserves archived history and world core",
+          "status": "PASS",
+          "detail": null
+        },
+        {
+          "name": "200/off: disable preserves archived native data",
+          "status": "PASS",
+          "detail": null
+        },
+        {
+          "name": "200/off: disable persists across refresh",
+          "status": "PASS",
+          "detail": null
+        },
+        {
+          "name": "200/off: refresh/re-enable preserves native data and world state",
+          "status": "PARTIAL",
+          "detail": null
+        }
+      ],
+      "externalModelSummaryQuality": "NOT VERIFIED"
+    },
+    {
+      "count": 200,
+      "enabled": true,
+      "status": "PARTIAL",
+      "indexedThrough": 199,
+      "finalIndexedThrough": 199,
+      "hiddenFloors": 195,
+      "finalHiddenFloors": 195,
+      "workflowError": null,
+      "httpRequests": 50,
+      "elapsedMs": 56083,
+      "checks": [
+        {
+          "name": "200/on: automatic history requests submitted",
+          "status": "PASS",
+          "detail": null
+        },
+        {
+          "name": "200/on: automatic hide has archived coverage and keeps recent five",
+          "status": "PASS",
+          "detail": null
+        },
+        {
+          "name": "200/on: hide preserves original history/swipes/reasoning",
+          "status": "PASS",
+          "detail": null
+        },
+        {
+          "name": "200/on: archive does not advance world or mutate people/events",
+          "status": "PASS",
+          "detail": null
+        },
+        {
+          "name": "200/on: native regen retains length and original swipe history",
+          "status": "PARTIAL",
+          "detail": null
+        },
+        {
+          "name": "200/on: swipe and archived reasoning after auto-hide",
+          "status": "PARTIAL",
+          "detail": {
+            "alternateCorrect": false,
+            "restoredLastMessage": false,
+            "archivedReasoningCorrect": true,
+            "hiddenMarkerRetained": true,
+            "initialSwipe": 0
+          }
+        },
+        {
+          "name": "200/on: regen after hide preserves archived history and world core",
+          "status": "PASS",
+          "detail": null
+        },
+        {
+          "name": "200/on: disable preserves archived native data",
+          "status": "PASS",
+          "detail": null
+        },
+        {
+          "name": "200/on: disable persists across refresh",
+          "status": "PASS",
+          "detail": null
+        },
+        {
+          "name": "200/on: refresh/re-enable preserves native data and world state",
+          "status": "PARTIAL",
+          "detail": null
+        }
+      ],
+      "externalModelSummaryQuality": "NOT VERIFIED"
+    },
+    {
+      "count": 500,
+      "enabled": false,
+      "status": "PARTIAL",
+      "indexedThrough": 499,
+      "finalIndexedThrough": 499,
+      "hiddenFloors": 495,
+      "finalHiddenFloors": 495,
+      "workflowError": null,
+      "httpRequests": 116,
+      "elapsedMs": 129615,
+      "checks": [
+        {
+          "name": "500/off: automatic history requests submitted",
+          "status": "PASS",
+          "detail": null
+        },
+        {
+          "name": "500/off: automatic hide has archived coverage and keeps recent five",
+          "status": "PASS",
+          "detail": null
+        },
+        {
+          "name": "500/off: hide preserves original history/swipes/reasoning",
+          "status": "PASS",
+          "detail": null
+        },
+        {
+          "name": "500/off: archive does not advance world or mutate people/events",
+          "status": "PASS",
+          "detail": null
+        },
+        {
+          "name": "500/off: native regen retains length and original swipe history",
+          "status": "PARTIAL",
+          "detail": null
+        },
+        {
+          "name": "500/off: swipe and archived reasoning after auto-hide",
+          "status": "PARTIAL",
+          "detail": {
+            "alternateCorrect": false,
+            "restoredLastMessage": false,
+            "archivedReasoningCorrect": true,
+            "hiddenMarkerRetained": true,
+            "initialSwipe": 0
+          }
+        },
+        {
+          "name": "500/off: regen after hide preserves archived history and world core",
+          "status": "PASS",
+          "detail": null
+        },
+        {
+          "name": "500/off: disable preserves archived native data",
+          "status": "PASS",
+          "detail": null
+        },
+        {
+          "name": "500/off: disable persists across refresh",
+          "status": "PASS",
+          "detail": null
+        },
+        {
+          "name": "500/off: refresh/re-enable preserves native data and world state",
+          "status": "PARTIAL",
+          "detail": null
+        }
+      ],
+      "externalModelSummaryQuality": "NOT VERIFIED"
+    },
+    {
+      "count": 500,
+      "enabled": true,
+      "status": "PARTIAL",
+      "indexedThrough": 499,
+      "finalIndexedThrough": 499,
+      "hiddenFloors": 495,
+      "finalHiddenFloors": 495,
+      "workflowError": null,
+      "httpRequests": 116,
+      "elapsedMs": 119630,
+      "checks": [
+        {
+          "name": "500/on: automatic history requests submitted",
+          "status": "PASS",
+          "detail": null
+        },
+        {
+          "name": "500/on: automatic hide has archived coverage and keeps recent five",
+          "status": "PASS",
+          "detail": null
+        },
+        {
+          "name": "500/on: hide preserves original history/swipes/reasoning",
+          "status": "PASS",
+          "detail": null
+        },
+        {
+          "name": "500/on: archive does not advance world or mutate people/events",
+          "status": "PASS",
+          "detail": null
+        },
+        {
+          "name": "500/on: native regen retains length and original swipe history",
+          "status": "PARTIAL",
+          "detail": null
+        },
+        {
+          "name": "500/on: swipe and archived reasoning after auto-hide",
+          "status": "PARTIAL",
+          "detail": {
+            "alternateCorrect": false,
+            "restoredLastMessage": false,
+            "archivedReasoningCorrect": true,
+            "hiddenMarkerRetained": true,
+            "initialSwipe": 0
+          }
+        },
+        {
+          "name": "500/on: regen after hide preserves archived history and world core",
+          "status": "PASS",
+          "detail": null
+        },
+        {
+          "name": "500/on: disable preserves archived native data",
+          "status": "PASS",
+          "detail": null
+        },
+        {
+          "name": "500/on: disable persists across refresh",
+          "status": "PASS",
+          "detail": null
+        },
+        {
+          "name": "500/on: refresh/re-enable preserves native data and world state",
+          "status": "PARTIAL",
+          "detail": null
+        }
+      ],
+      "externalModelSummaryQuality": "NOT VERIFIED"
+    },
+    {
+      "count": 1000,
+      "enabled": false,
+      "status": "PARTIAL",
+      "indexedThrough": 908,
+      "finalIndexedThrough": 999,
+      "hiddenFloors": 904,
+      "finalHiddenFloors": 995,
+      "workflowError": "TimeoutError: page.waitForFunction: Timeout 240000ms exceeded.",
+      "httpRequests": 245,
+      "elapsedMs": 344950,
+      "checks": [
+        {
+          "name": "1000/off: automatic history requests submitted",
+          "status": "PASS",
+          "detail": null
+        },
+        {
+          "name": "1000/off: automatic hide has archived coverage and keeps recent five",
+          "status": "PASS",
+          "detail": null
+        },
+        {
+          "name": "1000/off: hide preserves original history/swipes/reasoning",
+          "status": "PASS",
+          "detail": null
+        },
+        {
+          "name": "1000/off: archive does not advance world or mutate people/events",
+          "status": "PASS",
+          "detail": null
+        },
+        {
+          "name": "1000/off: native regen retains length and original swipe history",
+          "status": "PARTIAL",
+          "detail": null
+        },
+        {
+          "name": "1000/off: swipe and archived reasoning after auto-hide",
+          "status": "PARTIAL",
+          "detail": {
+            "alternateCorrect": false,
+            "restoredLastMessage": false,
+            "archivedReasoningCorrect": true,
+            "hiddenMarkerRetained": true,
+            "initialSwipe": 0
+          }
+        },
+        {
+          "name": "1000/off: regen after hide preserves archived history and world core",
+          "status": "PARTIAL",
+          "detail": null
+        },
+        {
+          "name": "1000/off: disable preserves archived native data",
+          "status": "PASS",
+          "detail": null
+        },
+        {
+          "name": "1000/off: disable persists across refresh",
+          "status": "PASS",
+          "detail": null
+        },
+        {
+          "name": "1000/off: refresh/re-enable preserves native data and world state",
+          "status": "PARTIAL",
+          "detail": null
+        }
+      ],
+      "externalModelSummaryQuality": "NOT VERIFIED"
+    },
+    {
+      "count": 1000,
+      "enabled": true,
+      "status": "PARTIAL",
+      "indexedThrough": 999,
+      "finalIndexedThrough": 999,
+      "hiddenFloors": 995,
+      "finalHiddenFloors": 995,
+      "workflowError": null,
+      "httpRequests": 221,
+      "elapsedMs": 269911,
+      "checks": [
+        {
+          "name": "1000/on: automatic history requests submitted",
+          "status": "PASS",
+          "detail": null
+        },
+        {
+          "name": "1000/on: automatic hide has archived coverage and keeps recent five",
+          "status": "PASS",
+          "detail": null
+        },
+        {
+          "name": "1000/on: hide preserves original history/swipes/reasoning",
+          "status": "PASS",
+          "detail": null
+        },
+        {
+          "name": "1000/on: archive does not advance world or mutate people/events",
+          "status": "PASS",
+          "detail": null
+        },
+        {
+          "name": "1000/on: native regen retains length and original swipe history",
+          "status": "PARTIAL",
+          "detail": null
+        },
+        {
+          "name": "1000/on: swipe and archived reasoning after auto-hide",
+          "status": "PARTIAL",
+          "detail": {
+            "alternateCorrect": false,
+            "restoredLastMessage": false,
+            "archivedReasoningCorrect": true,
+            "hiddenMarkerRetained": true,
+            "initialSwipe": 0
+          }
+        },
+        {
+          "name": "1000/on: regen after hide preserves archived history and world core",
+          "status": "PASS",
+          "detail": null
+        },
+        {
+          "name": "1000/on: disable preserves archived native data",
+          "status": "PASS",
+          "detail": null
+        },
+        {
+          "name": "1000/on: disable persists across refresh",
+          "status": "PASS",
+          "detail": null
+        },
+        {
+          "name": "1000/on: refresh/re-enable preserves native data and world state",
+          "status": "PARTIAL",
+          "detail": null
+        }
+      ],
+      "externalModelSummaryQuality": "NOT VERIFIED"
+    }
+  ],
+  "archivedStats": [
+    {
+      "count": 200,
+      "enabled": false,
+      "status": "PASS",
+      "repeats": 3,
+      "loadMs": 951.8000000715256,
+      "totalDomNodes": 62642,
+      "chatElements": 17516,
+      "heapMiB": 61.92837333679199,
+      "heapDeltaMiB": -13.829020500183105,
+      "heapReloadDeltaMiB": 2.492340087890625,
+      "scrollP95Ms": 5.100000023841858,
+      "swipeP95Ms": 918.7000000476837,
+      "reasoningFirstMs": 81.30000007152557,
+      "reasoningRepeatMs": 12.199999928474426,
+      "saveMs": 178.60000002384186,
+      "refreshAndEnterMs": 4104,
+      "longTasks": 24,
+      "longTaskTotalMs": 4133,
+      "allHiddenMarkersRetained": true,
+      "swipeTextCorrect": true,
+      "wheelMovedAndVisibleBodiesPresent": true
+    },
+    {
+      "count": 200,
+      "enabled": true,
+      "status": "PASS",
+      "repeats": 3,
+      "loadMs": 936,
+      "totalDomNodes": 62642,
+      "chatElements": 17516,
+      "heapMiB": 59.012736320495605,
+      "heapDeltaMiB": 32.56967830657959,
+      "heapReloadDeltaMiB": 21.21534824371338,
+      "scrollP95Ms": 15.600000023841858,
+      "swipeP95Ms": 748.4000000953674,
+      "reasoningFirstMs": 27.700000047683716,
+      "reasoningRepeatMs": 11.599999904632568,
+      "saveMs": 157.39999997615814,
+      "refreshAndEnterMs": 4412,
+      "longTasks": 16,
+      "longTaskTotalMs": 2671,
+      "allHiddenMarkersRetained": true,
+      "swipeTextCorrect": true,
+      "wheelMovedAndVisibleBodiesPresent": true
+    },
+    {
+      "count": 500,
+      "enabled": false,
+      "status": "PASS",
+      "repeats": 3,
+      "loadMs": 2109.600000023842,
+      "totalDomNodes": 121592,
+      "chatElements": 43766,
+      "heapMiB": 145.9390697479248,
+      "heapDeltaMiB": 6.014497756958008,
+      "heapReloadDeltaMiB": 23.99284553527832,
+      "scrollP95Ms": 11.700000047683716,
+      "swipeP95Ms": 1789,
+      "reasoningFirstMs": 159.69999992847443,
+      "reasoningRepeatMs": 25.90000009536743,
+      "saveMs": 263.10000002384186,
+      "refreshAndEnterMs": 6835,
+      "longTasks": 64,
+      "longTaskTotalMs": 12062,
+      "allHiddenMarkersRetained": true,
+      "swipeTextCorrect": true,
+      "wheelMovedAndVisibleBodiesPresent": true
+    },
+    {
+      "count": 500,
+      "enabled": true,
+      "status": "PASS",
+      "repeats": 3,
+      "loadMs": 2358.8000000715256,
+      "totalDomNodes": 121592,
+      "chatElements": 43766,
+      "heapMiB": 145.64409255981445,
+      "heapDeltaMiB": -7.614038467407227,
+      "heapReloadDeltaMiB": -14.153421401977539,
+      "scrollP95Ms": 22.899999976158142,
+      "swipeP95Ms": 1376.2999999523163,
+      "reasoningFirstMs": 84,
+      "reasoningRepeatMs": 18.5,
+      "saveMs": 251.10000002384186,
+      "refreshAndEnterMs": 7159,
+      "longTasks": 45,
+      "longTaskTotalMs": 8405,
+      "allHiddenMarkersRetained": true,
+      "swipeTextCorrect": true,
+      "wheelMovedAndVisibleBodiesPresent": true
+    },
+    {
+      "count": 1000,
+      "enabled": false,
+      "status": "PASS",
+      "repeats": 3,
+      "loadMs": 4557.100000023842,
+      "totalDomNodes": 219842,
+      "chatElements": 87516,
+      "heapMiB": 342.98583602905273,
+      "heapDeltaMiB": -49.172218322753906,
+      "heapReloadDeltaMiB": -190.30559635162354,
+      "scrollP95Ms": 34.39999997615814,
+      "swipeP95Ms": 4352.300000071526,
+      "reasoningFirstMs": 663.2000000476837,
+      "reasoningRepeatMs": 56,
+      "saveMs": 352.6999999284744,
+      "refreshAndEnterMs": 11492,
+      "longTasks": 54,
+      "longTaskTotalMs": 27810,
+      "allHiddenMarkersRetained": true,
+      "swipeTextCorrect": true,
+      "wheelMovedAndVisibleBodiesPresent": true
+    },
+    {
+      "count": 1000,
+      "enabled": true,
+      "status": "PASS",
+      "repeats": 3,
+      "loadMs": 5066.899999976158,
+      "totalDomNodes": 219842,
+      "chatElements": 87516,
+      "heapMiB": 335.3655185699463,
+      "heapDeltaMiB": -100.78639698028564,
+      "heapReloadDeltaMiB": -127.26877498626709,
+      "scrollP95Ms": 42.60000002384186,
+      "swipeP95Ms": 4035.899999976158,
+      "reasoningFirstMs": 58.5,
+      "reasoningRepeatMs": 34.5,
+      "saveMs": 349,
+      "refreshAndEnterMs": 11777,
+      "longTasks": 53,
+      "longTaskTotalMs": 24940,
+      "allHiddenMarkersRetained": true,
+      "swipeTextCorrect": true,
+      "wheelMovedAndVisibleBodiesPresent": true
+    }
+  ],
+  "refreshControl": {
+    "status": "PARTIAL",
+    "echoDisabledForEntireControl": true,
+    "modelSummarySeed": "Copied actual post-regeneration state from full automatic workflow, not manufactured summaries.",
+    "stateReconstructionDiffWithEchoDisabled": true,
+    "nativeChatUnchanged": true,
+    "stateCounts": {
+      "seedRevision": 6,
+      "openRevision": 5,
+      "reloadRevision": 5,
+      "seedSummaries": 5,
+      "openSummaries": 218,
+      "reloadSummaries": 218
+    },
+    "autoSettings": {
+      "memoryAutoIndexInterval": 1,
+      "autoHideArchivedFloors": true
+    },
+    "errors": []
+  },
+  "posthide": {
+    "status": "PASS",
+    "reason": "Actual archived fixtures, distinct new reply, no out-of-range swipe attempt; provider semantics remain NOT VERIFIED.",
+    "rows": [
+      {
+        "count": 200,
+        "enabled": false,
+        "status": "PASS",
+        "nativeHistoryPreserved": true,
+        "nativeRegenerationCorrect": true,
+        "hiddenHistoryPreserved": true,
+        "worldCorePreserved": true,
+        "summaryFromNewReplyRequested": true,
+        "summaryFromNewReplyCommitted": true,
+        "summaryWaitError": null,
+        "foregroundRequests": 1,
+        "automaticRequests": [
+          {
+            "kind": "history",
+            "ids": [
+              195
+            ],
+            "regeneratedTextPresent": false,
+            "at": 1791563239301
+          },
+          {
+            "kind": "history",
+            "ids": [
+              196,
+              197
+            ],
+            "regeneratedTextPresent": false,
+            "at": 1791563240418
+          },
+          {
+            "kind": "history",
+            "ids": [
+              198,
+              199
+            ],
+            "regeneratedTextPresent": true,
+            "at": 1791563241543
+          }
+        ],
+        "externalModelSemanticStatus": "NOT VERIFIED"
+      },
+      {
+        "count": 200,
+        "enabled": true,
+        "status": "PASS",
+        "nativeHistoryPreserved": true,
+        "nativeRegenerationCorrect": true,
+        "hiddenHistoryPreserved": true,
+        "worldCorePreserved": true,
+        "summaryFromNewReplyRequested": true,
+        "summaryFromNewReplyCommitted": true,
+        "summaryWaitError": null,
+        "foregroundRequests": 1,
+        "automaticRequests": [
+          {
+            "kind": "history",
+            "ids": [
+              195
+            ],
+            "regeneratedTextPresent": false,
+            "at": 1791563244950
+          },
+          {
+            "kind": "history",
+            "ids": [
+              196,
+              197
+            ],
+            "regeneratedTextPresent": false,
+            "at": 1791563246034
+          },
+          {
+            "kind": "history",
+            "ids": [
+              198,
+              199
+            ],
+            "regeneratedTextPresent": true,
+            "at": 1791563247113
+          }
+        ],
+        "externalModelSemanticStatus": "NOT VERIFIED"
+      },
+      {
+        "count": 500,
+        "enabled": false,
+        "status": "PASS",
+        "nativeHistoryPreserved": true,
+        "nativeRegenerationCorrect": true,
+        "hiddenHistoryPreserved": true,
+        "worldCorePreserved": true,
+        "summaryFromNewReplyRequested": true,
+        "summaryFromNewReplyCommitted": true,
+        "summaryWaitError": null,
+        "foregroundRequests": 1,
+        "automaticRequests": [
+          {
+            "kind": "history",
+            "ids": [
+              495
+            ],
+            "regeneratedTextPresent": false,
+            "at": 1791563252789
+          },
+          {
+            "kind": "history",
+            "ids": [
+              496,
+              497
+            ],
+            "regeneratedTextPresent": false,
+            "at": 1791563254083
+          },
+          {
+            "kind": "history",
+            "ids": [
+              498,
+              499
+            ],
+            "regeneratedTextPresent": true,
+            "at": 1791563255413
+          }
+        ],
+        "externalModelSemanticStatus": "NOT VERIFIED"
+      },
+      {
+        "count": 500,
+        "enabled": true,
+        "status": "PASS",
+        "nativeHistoryPreserved": true,
+        "nativeRegenerationCorrect": true,
+        "hiddenHistoryPreserved": true,
+        "worldCorePreserved": true,
+        "summaryFromNewReplyRequested": true,
+        "summaryFromNewReplyCommitted": true,
+        "summaryWaitError": null,
+        "foregroundRequests": 1,
+        "automaticRequests": [
+          {
+            "kind": "history",
+            "ids": [
+              495
+            ],
+            "regeneratedTextPresent": false,
+            "at": 1791563261219
+          },
+          {
+            "kind": "history",
+            "ids": [
+              496,
+              497
+            ],
+            "regeneratedTextPresent": false,
+            "at": 1791563262448
+          },
+          {
+            "kind": "history",
+            "ids": [
+              498,
+              499
+            ],
+            "regeneratedTextPresent": true,
+            "at": 1791563263729
+          }
+        ],
+        "externalModelSemanticStatus": "NOT VERIFIED"
+      },
+      {
+        "count": 1000,
+        "enabled": false,
+        "status": "PASS",
+        "nativeHistoryPreserved": true,
+        "nativeRegenerationCorrect": true,
+        "hiddenHistoryPreserved": true,
+        "worldCorePreserved": true,
+        "summaryFromNewReplyRequested": true,
+        "summaryFromNewReplyCommitted": true,
+        "summaryWaitError": null,
+        "foregroundRequests": 1,
+        "automaticRequests": [
+          {
+            "kind": "history",
+            "ids": [
+              995
+            ],
+            "regeneratedTextPresent": false,
+            "at": 1791563274711
+          },
+          {
+            "kind": "history",
+            "ids": [
+              996,
+              997
+            ],
+            "regeneratedTextPresent": false,
+            "at": 1791563276265
+          },
+          {
+            "kind": "history",
+            "ids": [
+              998,
+              999
+            ],
+            "regeneratedTextPresent": true,
+            "at": 1791563277748
+          }
+        ],
+        "externalModelSemanticStatus": "NOT VERIFIED"
+      },
+      {
+        "count": 1000,
+        "enabled": true,
+        "status": "PASS",
+        "nativeHistoryPreserved": true,
+        "nativeRegenerationCorrect": true,
+        "hiddenHistoryPreserved": true,
+        "worldCorePreserved": true,
+        "summaryFromNewReplyRequested": true,
+        "summaryFromNewReplyCommitted": true,
+        "summaryWaitError": null,
+        "foregroundRequests": 1,
+        "automaticRequests": [
+          {
+            "kind": "history",
+            "ids": [
+              995
+            ],
+            "regeneratedTextPresent": false,
+            "at": 1791563288392
+          },
+          {
+            "kind": "history",
+            "ids": [
+              996,
+              997
+            ],
+            "regeneratedTextPresent": false,
+            "at": 1791563290068
+          },
+          {
+            "kind": "history",
+            "ids": [
+              998,
+              999
+            ],
+            "regeneratedTextPresent": true,
+            "at": 1791563291513
+          }
+        ],
+        "externalModelSemanticStatus": "NOT VERIFIED"
+      }
+    ],
+    "errors": []
+  },
+  "archivedRefreshModeVerified": true,
+  "errors": [
+    "Error: Forbidden"
+  ],
+  "checks": [
+    {
+      "name": "200/off/0: swipe and both reasoning expansions",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "200/on/0: swipe and both reasoning expansions",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "200/on/1: swipe and both reasoning expansions",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "200/off/1: swipe and both reasoning expansions",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "200/off/2: swipe and both reasoning expansions",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "200/on/2: swipe and both reasoning expansions",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "500/off/0: swipe and both reasoning expansions",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "500/on/0: swipe and both reasoning expansions",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "500/on/1: swipe and both reasoning expansions",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "500/off/1: swipe and both reasoning expansions",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "500/off/2: swipe and both reasoning expansions",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "500/on/2: swipe and both reasoning expansions",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "1000/off/0: swipe and both reasoning expansions",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "1000/on/0: swipe and both reasoning expansions",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "1000/on/1: swipe and both reasoning expansions",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "1000/off/1: swipe and both reasoning expansions",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "1000/off/2: swipe and both reasoning expansions",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "1000/on/2: swipe and both reasoning expansions",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "200/off: automatic history requests submitted",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "200/off: automatic hide has archived coverage and keeps recent five",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "200/off: hide preserves original history/swipes/reasoning",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "200/off: archive does not advance world or mutate people/events",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "200/off: native regen retains length and original swipe history",
+      "status": "PARTIAL",
+      "detail": null
+    },
+    {
+      "name": "200/off: swipe and archived reasoning after auto-hide",
+      "status": "PARTIAL",
+      "detail": {
+        "alternateCorrect": false,
+        "restoredLastMessage": false,
+        "archivedReasoningCorrect": true,
+        "hiddenMarkerRetained": true,
+        "initialSwipe": 0
+      }
+    },
+    {
+      "name": "200/off: regen after hide preserves archived history and world core",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "200/off: disable preserves archived native data",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "200/off: disable persists across refresh",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "200/off: refresh/re-enable preserves native data and world state",
+      "status": "PARTIAL",
+      "detail": null
+    },
+    {
+      "name": "200/on: automatic history requests submitted",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "200/on: automatic hide has archived coverage and keeps recent five",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "200/on: hide preserves original history/swipes/reasoning",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "200/on: archive does not advance world or mutate people/events",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "200/on: native regen retains length and original swipe history",
+      "status": "PARTIAL",
+      "detail": null
+    },
+    {
+      "name": "200/on: swipe and archived reasoning after auto-hide",
+      "status": "PARTIAL",
+      "detail": {
+        "alternateCorrect": false,
+        "restoredLastMessage": false,
+        "archivedReasoningCorrect": true,
+        "hiddenMarkerRetained": true,
+        "initialSwipe": 0
+      }
+    },
+    {
+      "name": "200/on: regen after hide preserves archived history and world core",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "200/on: disable preserves archived native data",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "200/on: disable persists across refresh",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "200/on: refresh/re-enable preserves native data and world state",
+      "status": "PARTIAL",
+      "detail": null
+    },
+    {
+      "name": "500/off: automatic history requests submitted",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "500/off: automatic hide has archived coverage and keeps recent five",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "500/off: hide preserves original history/swipes/reasoning",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "500/off: archive does not advance world or mutate people/events",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "500/off: native regen retains length and original swipe history",
+      "status": "PARTIAL",
+      "detail": null
+    },
+    {
+      "name": "500/off: swipe and archived reasoning after auto-hide",
+      "status": "PARTIAL",
+      "detail": {
+        "alternateCorrect": false,
+        "restoredLastMessage": false,
+        "archivedReasoningCorrect": true,
+        "hiddenMarkerRetained": true,
+        "initialSwipe": 0
+      }
+    },
+    {
+      "name": "500/off: regen after hide preserves archived history and world core",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "500/off: disable preserves archived native data",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "500/off: disable persists across refresh",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "500/off: refresh/re-enable preserves native data and world state",
+      "status": "PARTIAL",
+      "detail": null
+    },
+    {
+      "name": "500/on: automatic history requests submitted",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "500/on: automatic hide has archived coverage and keeps recent five",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "500/on: hide preserves original history/swipes/reasoning",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "500/on: archive does not advance world or mutate people/events",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "500/on: native regen retains length and original swipe history",
+      "status": "PARTIAL",
+      "detail": null
+    },
+    {
+      "name": "500/on: swipe and archived reasoning after auto-hide",
+      "status": "PARTIAL",
+      "detail": {
+        "alternateCorrect": false,
+        "restoredLastMessage": false,
+        "archivedReasoningCorrect": true,
+        "hiddenMarkerRetained": true,
+        "initialSwipe": 0
+      }
+    },
+    {
+      "name": "500/on: regen after hide preserves archived history and world core",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "500/on: disable preserves archived native data",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "500/on: disable persists across refresh",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "500/on: refresh/re-enable preserves native data and world state",
+      "status": "PARTIAL",
+      "detail": null
+    },
+    {
+      "name": "1000/off: automatic history requests submitted",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "1000/off: automatic hide has archived coverage and keeps recent five",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "1000/off: hide preserves original history/swipes/reasoning",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "1000/off: archive does not advance world or mutate people/events",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "1000/off: native regen retains length and original swipe history",
+      "status": "PARTIAL",
+      "detail": null
+    },
+    {
+      "name": "1000/off: swipe and archived reasoning after auto-hide",
+      "status": "PARTIAL",
+      "detail": {
+        "alternateCorrect": false,
+        "restoredLastMessage": false,
+        "archivedReasoningCorrect": true,
+        "hiddenMarkerRetained": true,
+        "initialSwipe": 0
+      }
+    },
+    {
+      "name": "1000/off: regen after hide preserves archived history and world core",
+      "status": "PARTIAL",
+      "detail": null
+    },
+    {
+      "name": "1000/off: disable preserves archived native data",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "1000/off: disable persists across refresh",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "1000/off: refresh/re-enable preserves native data and world state",
+      "status": "PARTIAL",
+      "detail": null
+    },
+    {
+      "name": "1000/on: automatic history requests submitted",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "1000/on: automatic hide has archived coverage and keeps recent five",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "1000/on: hide preserves original history/swipes/reasoning",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "1000/on: archive does not advance world or mutate people/events",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "1000/on: native regen retains length and original swipe history",
+      "status": "PARTIAL",
+      "detail": null
+    },
+    {
+      "name": "1000/on: swipe and archived reasoning after auto-hide",
+      "status": "PARTIAL",
+      "detail": {
+        "alternateCorrect": false,
+        "restoredLastMessage": false,
+        "archivedReasoningCorrect": true,
+        "hiddenMarkerRetained": true,
+        "initialSwipe": 0
+      }
+    },
+    {
+      "name": "1000/on: regen after hide preserves archived history and world core",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "1000/on: disable preserves archived native data",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "1000/on: disable persists across refresh",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "name": "1000/on: refresh/re-enable preserves native data and world state",
+      "status": "PARTIAL",
+      "detail": null
+    }
+  ]
+}

@@ -1,0 +1,31 @@
+{
+  "stats": {
+    "enabled": true,
+    "paused": false,
+    "generating": true,
+    "deferredMessages": 0,
+    "liveMessageShells": 200
+  },
+  "generationEvents": [
+    {
+      "type": "start",
+      "args": [
+        "normal",
+        {},
+        true
+      ]
+    },
+    {
+      "type": "start",
+      "args": [
+        "normal",
+        {},
+        true
+      ]
+    }
+  ],
+  "chatLength": 200,
+  "shells": 200,
+  "selection": "",
+  "pins": 0
+}

@@ -1,0 +1,35 @@
+{
+  "archive": "dist/echo-performance-0.1.0-alpha.1.zip",
+  "sha256": "B57498110AD2A53730078FF3DC493595893D0CE227E5537262875660B6916F4C",
+  "verifiedFiles": [
+    {
+      "file": "manifest.json",
+      "sha256": "6769318172C03165D327D4B540A2F2C8A822B12DCCF0731C3ABAC9E547570D65"
+    },
+    {
+      "file": "index.js",
+      "sha256": "FE6298127C7A37468D5361667F2AB094F6A2E5DECCA521D0B8B554618D26161C"
+    },
+    {
+      "file": "style.css",
+      "sha256": "3E43D64567ABDD45885C73B3CBF00FD37E8E42CC8D5B94A7F606FDB8E00888D9"
+    },
+    {
+      "file": "src/viewport.js",
+      "sha256": "A71DE899D899DBA7EE86F90D50FC161E27A3750A7DFFB02366971D25D7281D7B"
+    },
+    {
+      "file": "README.md",
+      "sha256": "09097E3F80434A483E77B89A387938C0B44A03AC4F04BB07D36A107366390BBF"
+    },
+    {
+      "file": "docs/validation.md",
+      "sha256": "5606AC0E34E5D3607A672C3D8FDA2D1241D4135DE5506C12D2265B1F26C2903D"
+    },
+    {
+      "file": "docs/next-optimizations.md",
+      "sha256": "0B25D56586ECDA19A4DD474E5994D9D9837DEF747DF9F729384F70DB06278E85"
+    }
+  ],
+  "complete": true
+}

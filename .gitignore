@@ -1,0 +1,9 @@
+node_modules/
+evidence/**/*.png
+evidence/**/*.log
+!evidence/acceptance-v2/*.png
+!evidence/acceptance-v2/*.log
+dist/
+evidence/tuning/
+evidence/layout-tuning/
+evidence/layout-batched/

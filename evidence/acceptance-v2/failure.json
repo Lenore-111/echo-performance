@@ -1,0 +1,7 @@
+{
+  "status": "PARTIAL",
+  "error": "Error: page.evaluate: TypeError: Cannot read properties of undefined (reading 'avatar')\n    at eval (eval at evaluate (:311:30), <anonymous>:2:92)\n    at async <anonymous>:337:30",
+  "checks": [],
+  "errors": [],
+  "requests": []
+}

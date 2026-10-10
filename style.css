@@ -1,0 +1,7 @@
+.echo-performance-settings p { font-size: 0.9em; line-height: 1.6; opacity: 0.85; }
+.echo-performance-settings small { display: block; margin: 0.6em 0; }
+.echo-performance-settings .menu_button {
+    width: fit-content;
+    max-width: 100%;
+    white-space: normal;
+}

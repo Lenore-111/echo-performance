@@ -1,0 +1,259 @@
+{
+  "status": "PASS",
+  "reason": "Actual archived fixtures, distinct new reply, no out-of-range swipe attempt; provider semantics remain NOT VERIFIED.",
+  "rows": [
+    {
+      "count": 200,
+      "enabled": false,
+      "status": "PASS",
+      "nativeHistoryPreserved": true,
+      "nativeRegenerationCorrect": true,
+      "hiddenHistoryPreserved": true,
+      "worldCorePreserved": true,
+      "summaryFromNewReplyRequested": true,
+      "summaryFromNewReplyCommitted": true,
+      "summaryWaitError": null,
+      "foregroundRequests": 1,
+      "automaticRequests": [
+        {
+          "kind": "history",
+          "ids": [
+            195
+          ],
+          "regeneratedTextPresent": false,
+          "at": 1791563239301
+        },
+        {
+          "kind": "history",
+          "ids": [
+            196,
+            197
+          ],
+          "regeneratedTextPresent": false,
+          "at": 1791563240418
+        },
+        {
+          "kind": "history",
+          "ids": [
+            198,
+            199
+          ],
+          "regeneratedTextPresent": true,
+          "at": 1791563241543
+        }
+      ],
+      "externalModelSemanticStatus": "NOT VERIFIED"
+    },
+    {
+      "count": 200,
+      "enabled": true,
+      "status": "PASS",
+      "nativeHistoryPreserved": true,
+      "nativeRegenerationCorrect": true,
+      "hiddenHistoryPreserved": true,
+      "worldCorePreserved": true,
+      "summaryFromNewReplyRequested": true,
+      "summaryFromNewReplyCommitted": true,
+      "summaryWaitError": null,
+      "foregroundRequests": 1,
+      "automaticRequests": [
+        {
+          "kind": "history",
+          "ids": [
+            195
+          ],
+          "regeneratedTextPresent": false,
+          "at": 1791563244950
+        },
+        {
+          "kind": "history",
+          "ids": [
+            196,
+            197
+          ],
+          "regeneratedTextPresent": false,
+          "at": 1791563246034
+        },
+        {
+          "kind": "history",
+          "ids": [
+            198,
+            199
+          ],
+          "regeneratedTextPresent": true,
+          "at": 1791563247113
+        }
+      ],
+      "externalModelSemanticStatus": "NOT VERIFIED"
+    },
+    {
+      "count": 500,
+      "enabled": false,
+      "status": "PASS",
+      "nativeHistoryPreserved": true,
+      "nativeRegenerationCorrect": true,
+      "hiddenHistoryPreserved": true,
+      "worldCorePreserved": true,
+      "summaryFromNewReplyRequested": true,
+      "summaryFromNewReplyCommitted": true,
+      "summaryWaitError": null,
+      "foregroundRequests": 1,
+      "automaticRequests": [
+        {
+          "kind": "history",
+          "ids": [
+            495
+          ],
+          "regeneratedTextPresent": false,
+          "at": 1791563252789
+        },
+        {
+          "kind": "history",
+          "ids": [
+            496,
+            497
+          ],
+          "regeneratedTextPresent": false,
+          "at": 1791563254083
+        },
+        {
+          "kind": "history",
+          "ids": [
+            498,
+            499
+          ],
+          "regeneratedTextPresent": true,
+          "at": 1791563255413
+        }
+      ],
+      "externalModelSemanticStatus": "NOT VERIFIED"
+    },
+    {
+      "count": 500,
+      "enabled": true,
+      "status": "PASS",
+      "nativeHistoryPreserved": true,
+      "nativeRegenerationCorrect": true,
+      "hiddenHistoryPreserved": true,
+      "worldCorePreserved": true,
+      "summaryFromNewReplyRequested": true,
+      "summaryFromNewReplyCommitted": true,
+      "summaryWaitError": null,
+      "foregroundRequests": 1,
+      "automaticRequests": [
+        {
+          "kind": "history",
+          "ids": [
+            495
+          ],
+          "regeneratedTextPresent": false,
+          "at": 1791563261219
+        },
+        {
+          "kind": "history",
+          "ids": [
+            496,
+            497
+          ],
+          "regeneratedTextPresent": false,
+          "at": 1791563262448
+        },
+        {
+          "kind": "history",
+          "ids": [
+            498,
+            499
+          ],
+          "regeneratedTextPresent": true,
+          "at": 1791563263729
+        }
+      ],
+      "externalModelSemanticStatus": "NOT VERIFIED"
+    },
+    {
+      "count": 1000,
+      "enabled": false,
+      "status": "PASS",
+      "nativeHistoryPreserved": true,
+      "nativeRegenerationCorrect": true,
+      "hiddenHistoryPreserved": true,
+      "worldCorePreserved": true,
+      "summaryFromNewReplyRequested": true,
+      "summaryFromNewReplyCommitted": true,
+      "summaryWaitError": null,
+      "foregroundRequests": 1,
+      "automaticRequests": [
+        {
+          "kind": "history",
+          "ids": [
+            995
+          ],
+          "regeneratedTextPresent": false,
+          "at": 1791563274711
+        },
+        {
+          "kind": "history",
+          "ids": [
+            996,
+            997
+          ],
+          "regeneratedTextPresent": false,
+          "at": 1791563276265
+        },
+        {
+          "kind": "history",
+          "ids": [
+            998,
+            999
+          ],
+          "regeneratedTextPresent": true,
+          "at": 1791563277748
+        }
+      ],
+      "externalModelSemanticStatus": "NOT VERIFIED"
+    },
+    {
+      "count": 1000,
+      "enabled": true,
+      "status": "PASS",
+      "nativeHistoryPreserved": true,
+      "nativeRegenerationCorrect": true,
+      "hiddenHistoryPreserved": true,
+      "worldCorePreserved": true,
+      "summaryFromNewReplyRequested": true,
+      "summaryFromNewReplyCommitted": true,
+      "summaryWaitError": null,
+      "foregroundRequests": 1,
+      "automaticRequests": [
+        {
+          "kind": "history",
+          "ids": [
+            995
+          ],
+          "regeneratedTextPresent": false,
+          "at": 1791563288392
+        },
+        {
+          "kind": "history",
+          "ids": [
+            996,
+            997
+          ],
+          "regeneratedTextPresent": false,
+          "at": 1791563290068
+        },
+        {
+          "kind": "history",
+          "ids": [
+            998,
+            999
+          ],
+          "regeneratedTextPresent": true,
+          "at": 1791563291513
+        }
+      ],
+      "externalModelSemanticStatus": "NOT VERIFIED"
+    }
+  ],
+  "errors": []
+}
