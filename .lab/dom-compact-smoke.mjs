@@ -80,28 +80,35 @@ const coldState = target => page.evaluate(target => ({
 }), target);
 
 const testDirectColdSwipe = async target => page.evaluate(async target => {
-    const s = await import('/script.js');
+    const context = SillyTavern.getContext();
     const { SWIPE_DIRECTION, SWIPE_SOURCE } = await import('/scripts/constants.js');
     const liveBefore = document.querySelector(`#chat > .mes[mesid="${target}"]`) instanceof HTMLElement;
-    const message = s.chat[target];
+    const message = context.chat[target];
     if (!message || !Array.isArray(message.swipes) || message.swipes.length < 2) return { supported: false, liveBefore };
-    const before = message.swipe_id;
+    const before = Number(message.swipe_id ?? 0);
     const desired = before === 0 ? 1 : 0;
     const direction = desired > before ? SWIPE_DIRECTION.RIGHT : SWIPE_DIRECTION.LEFT;
     let thrown = null;
-    try { await s.swipe(null, direction, { source: SWIPE_SOURCE.SWIPE_PICKER, forceMesId: target, forceSwipeId: desired }); }
-    catch (error) { thrown = String(error); }
+    try {
+        await context.swipe.to(null, direction, {
+            source: SWIPE_SOURCE.SWIPE_PICKER,
+            repeated: false,
+            forceMesId: target,
+            forceSwipeId: desired,
+            forceDuration: 0,
+        });
+    } catch (error) { thrown = String(error?.stack || error); }
     await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
     const shell = document.querySelector(`#chat > .mes[mesid="${target}"]`);
-    const expectedText = s.chat[target]?.mes ?? '';
+    const expectedText = context.chat[target]?.mes ?? '';
     return {
         supported: true,
         liveBefore,
         mountedAfter: shell instanceof HTMLElement,
-        stateChanged: s.chat[target]?.swipe_id === desired,
+        stateChanged: context.chat[target]?.swipe_id === desired,
         domMatchesState: shell instanceof HTMLElement && shell.querySelector('.mes_text')?.textContent?.includes(expectedText.slice(0, 40)),
         before,
-        after: s.chat[target]?.swipe_id,
+        after: context.chat[target]?.swipe_id,
         thrown,
     };
 }, target);
