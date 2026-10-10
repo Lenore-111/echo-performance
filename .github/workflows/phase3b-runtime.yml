@@ -65,7 +65,7 @@ jobs:
       - name: Start clean SillyTavern runtime
         working-directory: sillytavern
         run: |
-          mkdir -p ../echo-test-data
+          mkdir -p ../echo-test-data "$LAB_EVIDENCE_DIR"
           node server.js \
             --port 8039 \
             --dataRoot "$GITHUB_WORKSPACE/echo-test-data" \
@@ -76,17 +76,31 @@ jobs:
           timeout 90 bash -c 'until curl -fsS http://127.0.0.1:8039/ >/dev/null; do sleep 1; done'
 
       - name: Bootstrap Echo Bench 1000 fixture
-        run: node .lab/phase3-fixture-bootstrap.mjs
+        id: bootstrap
+        continue-on-error: true
+        run: |
+          set -o pipefail
+          node .lab/phase3-fixture-bootstrap.mjs 2>&1 | tee "$LAB_EVIDENCE_DIR/bootstrap.log"
 
       - name: Run Phase 3B collect-all smoke
         id: smoke
+        if: steps.bootstrap.outcome == 'success'
         continue-on-error: true
-        run: node .lab/phase3-bridge-smoke-v6.mjs
+        run: |
+          set -o pipefail
+          node .lab/phase3-bridge-smoke-v6.mjs 2>&1 | tee "$LAB_EVIDENCE_DIR/smoke.log"
 
       - name: Print Phase 3B result
         if: always()
         run: |
+          echo "bootstrap outcome: ${{ steps.bootstrap.outcome }}"
+          echo "smoke outcome: ${{ steps.smoke.outcome }}"
+          if [ -f "$LAB_EVIDENCE_DIR/bootstrap-diagnostic.json" ]; then
+            echo '--- bootstrap diagnostic ---'
+            cat "$LAB_EVIDENCE_DIR/bootstrap-diagnostic.json"
+          fi
           if [ -f "$LAB_EVIDENCE_DIR/bridge-smoke-v6.json" ]; then
+            echo '--- bridge smoke ---'
             cat "$LAB_EVIDENCE_DIR/bridge-smoke-v6.json"
           else
             echo 'bridge-smoke-v6.json missing'
@@ -105,6 +119,6 @@ jobs:
           if-no-files-found: warn
           retention-days: 7
 
-      - name: Enforce smoke verdict
-        if: steps.smoke.outcome != 'success'
+      - name: Enforce runtime verdict
+        if: always() && (steps.bootstrap.outcome != 'success' || steps.smoke.outcome != 'success')
         run: exit 1
