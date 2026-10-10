@@ -31,13 +31,37 @@ function start() {
         });
     }
 
-    eventSource.makeFirst(eventTypes.GENERATION_STARTED, (_type, _options, dryRun) => {
+    const isSlashCommandPreflight = type => {
+        // SillyTavern emits GENERATION_STARTED before it checks whether the chat
+        // input is actually a slash command. When the slash command consumes the
+        // input, Generate() returns after unblockGeneration() without emitting a
+        // matching GENERATION_ENDED. Freezing at STARTED would therefore leave
+        // Echo permanently stuck in generating=true after commands such as
+        // /chat-jump. Only defer the ordinary chat-input generation path; real
+        // regenerate/swipe/quiet/etc. generations still freeze immediately.
+        if (type !== undefined && type !== 'normal') return false;
+        const input = document.querySelector('#send_textarea');
+        return input instanceof HTMLTextAreaElement && input.value.trimStart().startsWith('/');
+    };
+
+    eventSource.makeFirst(eventTypes.GENERATION_STARTED, (type, _options, dryRun) => {
         // SillyTavern prompt precomputation emits STARTED with dryRun=true and no
         // matching ENDED. Treating that as a real generation permanently freezes
         // compaction, so dry runs must be ignored completely.
         if (dryRun) return;
+        if (isSlashCommandPreflight(type)) return;
         viewport.generationStarted();
     });
+
+    if (eventTypes.GENERATION_AFTER_COMMANDS) {
+        eventSource.makeFirst(eventTypes.GENERATION_AFTER_COMMANDS, (_type, _options, dryRun) => {
+            // This event is only emitted when Generate() survives slash-command
+            // processing and is actually continuing into a generation. It closes
+            // the preflight gap above without changing the normal STARTED path.
+            if (dryRun || viewport.generating) return;
+            viewport.generationStarted();
+        });
+    }
 
     for (const key of ['GENERATION_ENDED', 'GENERATION_STOPPED']) {
         if (!eventTypes[key]) continue;
