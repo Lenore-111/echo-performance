@@ -82,6 +82,7 @@ const coldState = target => page.evaluate(target => ({
 const testDirectColdSwipe = async target => page.evaluate(async target => {
     const context = SillyTavern.getContext();
     const { SWIPE_DIRECTION, SWIPE_SOURCE } = await import('/scripts/constants.js');
+    const normalize = value => String(value ?? '').replace(/\s+/g, ' ').trim();
     const liveBefore = document.querySelector(`#chat > .mes[mesid="${target}"]`) instanceof HTMLElement;
     const message = context.chat[target];
     if (!message || !Array.isArray(message.swipes) || message.swipes.length < 2) return { supported: false, liveBefore };
@@ -100,15 +101,24 @@ const testDirectColdSwipe = async target => page.evaluate(async target => {
     } catch (error) { thrown = String(error?.stack || error); }
     await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
     const shell = document.querySelector(`#chat > .mes[mesid="${target}"]`);
-    const expectedText = context.chat[target]?.mes ?? '';
+    const domText = shell?.querySelector('.mes_text')?.textContent ?? '';
+    const chatText = context.chat[target]?.mes ?? '';
+    const swipeText = context.chat[target]?.swipes?.[desired] ?? '';
+    const normalizedDom = normalize(domText);
+    const normalizedChat = normalize(chatText);
+    const normalizedSwipe = normalize(swipeText);
+    const expected = normalizedChat || normalizedSwipe;
     return {
         supported: true,
         liveBefore,
         mountedAfter: shell instanceof HTMLElement,
         stateChanged: context.chat[target]?.swipe_id === desired,
-        domMatchesState: shell instanceof HTMLElement && shell.querySelector('.mes_text')?.textContent?.includes(expectedText.slice(0, 40)),
+        domMatchesState: shell instanceof HTMLElement && Boolean(expected) && normalizedDom.includes(expected.slice(0, 80)),
         before,
         after: context.chat[target]?.swipe_id,
+        domText,
+        chatText,
+        swipeText,
         thrown,
     };
 }, target);
@@ -198,16 +208,18 @@ try {
             const initial = await domSnapshot();
             const result = { count, enabled, loadMs, initial };
             if (enabled) {
-                const target = count % 2 === 0 ? Math.max(11, count - 191) : Math.max(11, count - 190);
+                const swipeTarget = count % 2 === 0 ? Math.max(11, count - 191) : Math.max(11, count - 190);
+                const jumpTarget = Math.min(count - 1, swipeTarget + 2);
+                result.targets = { swipeTarget, jumpTarget };
                 await page.evaluate(() => { const root = document.querySelector('#chat'); root.scrollTop = root.scrollHeight; });
                 await page.waitForTimeout(2600);
-                result.coldBefore = await coldState(target);
-                result.directColdSwipe = await testDirectColdSwipe(target);
+                result.coldBefore = await coldState(swipeTarget);
+                result.directColdSwipe = await testDirectColdSwipe(swipeTarget);
                 await page.evaluate(() => { const root = document.querySelector('#chat'); root.scrollTop = root.scrollHeight; });
                 await page.waitForTimeout(2600);
-                result.jumpColdBefore = await coldState(target);
-                result.jump = await testJump(target);
-                result.afterJumpInteractions = await testEditAndReasoningAfterJump(target);
+                result.jumpColdBefore = await coldState(jumpTarget);
+                result.jump = await testJump(jumpTarget);
+                result.afterJumpInteractions = await testEditAndReasoningAfterJump(jumpTarget);
                 result.showMore = await testShowMoreReconcile();
                 result.duplicates = await duplicateIds();
                 await page.evaluate(() => { const root = document.querySelector('#chat'); root.scrollTop = root.scrollHeight; });
