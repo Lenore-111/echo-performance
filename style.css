@@ -5,3 +5,18 @@
     max-width: 100%;
     white-space: normal;
 }
+
+/* Detached-history spacer. It intentionally contains no message content and
+   exists only to preserve scroll geometry while the original .mes nodes live
+   inside an in-memory DocumentFragment. */
+#chat > .echo-dom-chunk-placeholder {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    pointer-events: none;
+    visibility: hidden;
+    overflow: hidden;
+}
