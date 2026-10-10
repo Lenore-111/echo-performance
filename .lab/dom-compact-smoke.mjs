@@ -147,9 +147,7 @@ const testRegen = async () => {
         const last = c.chat.at(-1);
         return { length: c.chat.length, mes: last?.mes ?? '', reasoning: last?.extra?.reasoning ?? '' };
     });
-    let requests = 0;
     await page.route('**/api/backends/chat-completions/generate', async route => {
-        requests += 1;
         await route.fulfill({
             status: 200,
             contentType: 'application/json',
@@ -218,8 +216,6 @@ try {
                 result.edit = await testEdit(target);
                 result.reasoning = await testReasoning(target);
 
-                // Return to the bottom before exercising the native jump path so
-                // the target is cold again and ST must request historical DOM.
                 await page.evaluate(() => {
                     const root = document.querySelector('#chat');
                     root.scrollTop = root.scrollHeight;
@@ -230,7 +226,7 @@ try {
                 result.afterJump = await domSnapshot();
                 result.regen = await testRegen();
 
-                const samples = EchoPerformance ? result.afterJump.stats.restoreSamples ?? [] : [];
+                const samples = result.afterJump.stats.restoreSamples ?? [];
                 result.maxRestoreDriftPx = samples.length ? Math.max(...samples.map(sample => Math.abs(sample.driftPx ?? 0))) : null;
                 result.maxRestoreMs = samples.length ? Math.max(...samples.map(sample => sample.durationMs ?? 0)) : null;
             }
