@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "check": "node --check index.js && node --check src/dom-compact.js && node --check src/viewport.js && node --check .lab/benchmark.mjs",
+    "check": "node --check index.js && node --check src/dom-compact.js && node --check src/viewport.js && node --check .lab/benchmark.mjs && node --check .lab/dom-compact-smoke.mjs",
     "bench": "node .lab/benchmark.mjs"
   }
 }
