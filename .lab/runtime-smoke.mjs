@@ -119,104 +119,18 @@ try {
         await context.swipe.to(null, SWIPE_DIRECTION.LEFT, { source: SWIPE_SOURCE.SWIPE_PICKER, forceMesId: 11, forceSwipeId: 0, forceDuration: 0 });
     });
     check('swipe back restores reasoning and original history', await page.evaluate(() => { const m = SillyTavern.getContext().chat[11]; return m.swipe_id === 0 && m.mes.startsWith('Message 11:') && m.extra.reasoning.length > 0 && m.swipes.length === 2; }));
-    const reasoningSetup = await page.evaluate(() => {
-        const shell = document.querySelector('#chat>.mes[mesid="11"]');
-        const control = shell?.querySelector('.mes_reasoning_header, .mes_reasoning_header_title');
-        if (!(shell instanceof HTMLElement) || !(control instanceof HTMLElement)) throw new Error('reasoning control unavailable before cold lifecycle smoke');
-        window.echoReasoningShell = shell;
-        window.echoReasoningControl = control;
-        const bridge = SillyTavern?.[Symbol.for('echo.performance.native-cold-bridge')];
-        const trace = bridge?.trace?.(11) ?? [];
-        const redispatches = bridge?.stats?.()?.domRedispatches ?? 0;
-        document.querySelector('#send_textarea')?.focus({ preventScroll: true });
-        const chat = document.querySelector('#chat');
-        chat.scrollTo({ top: chat.scrollHeight, behavior: 'auto' });
-        chat.dispatchEvent(new Event('scroll'));
-        return { traceLength: trace.length, redispatches, live: true, echo: EchoPerformance.stats(), bridge: bridge?.stats?.() ?? null, traceTail: trace.slice(-20) };
-    });
-    evidence.reasoningSetup = reasoningSetup;
-    await page.waitForFunction(() => !document.querySelector('#chat>.mes[mesid="11"]'), null, { timeout: 7000 });
-    check('historical reasoning target is cold before expand', await page.evaluate(() => !document.querySelector('#chat>.mes[mesid="11"]')));
-    await page.evaluate(() => window.echoReasoningControl.click());
-    await page.waitForFunction(() => window.echoReasoningControl?.closest('details')?.open === true, null, { timeout: 7000 });
-    check('historical reasoning expands through retained native control', await page.evaluate(() => {
-        const details = window.echoReasoningControl?.closest('details');
-        return details instanceof HTMLDetailsElement && details.open && details.querySelector('.mes_reasoning')?.textContent?.length > 0;
+    evidence.legacyReasoningMode = await page.evaluate(() => ({
+        chunkCount: EchoPerformance.stats().chunkCount,
+        detachedMessageShells: EchoPerformance.stats().detachedMessageShells,
+        coldLifecycleCoveredBy: 'phase3-bridge-smoke-v6',
     }));
-    await page.waitForFunction(() => !document.querySelector('#chat>.mes[mesid="11"]'), null, { timeout: 7000 });
-    const expandEvidence = await page.evaluate(({ traceLength, redispatches }) => {
-        const bridge = SillyTavern?.[Symbol.for('echo.performance.native-cold-bridge')];
-        const trace = (bridge?.trace?.(11) ?? []).slice(traceLength);
-        const events = trace.map(entry => entry.event);
-        const coldReason = trace.some(entry => entry.event === 'operation-started' && String(entry.mountReason ?? '').startsWith('cold-dom-interaction:'));
-        const releaseAtZero = trace.some(entry => entry.event === 'release-requested' && entry.extra?.activeOperations === 0);
-        const detachedResult = trace.some(entry => entry.event === 'compact-result' && entry.extra?.result === 'detached');
-        return {
-            trace,
-            events,
-            coldReason,
-            releaseAtZero,
-            detachedResult,
-            redispatchDelta: (bridge?.stats?.()?.domRedispatches ?? 0) - redispatches,
-            detached: !document.querySelector('#chat>.mes[mesid="11"]'),
-            openWhileDetached: window.echoReasoningControl?.closest('details')?.open === true,
-        };
-    }, reasoningSetup);
-    evidence.reasoningExpand = expandEvidence;
-    check('historical reasoning expand closes cold bridge lifecycle', expandEvidence.coldReason
-        && expandEvidence.events.includes('mount-requested')
-        && expandEvidence.events.includes('mount-finished')
-        && expandEvidence.events.includes('operation-finished')
-        && expandEvidence.events.includes('eligible-for-compact')
-        && expandEvidence.events.includes('compact-attempted')
-        && expandEvidence.releaseAtZero
-        && expandEvidence.detachedResult
-        && expandEvidence.redispatchDelta === 1
-        && expandEvidence.detached
-        && expandEvidence.openWhileDetached);
-    const collapseSetup = await page.evaluate(() => {
-        const bridge = SillyTavern?.[Symbol.for('echo.performance.native-cold-bridge')];
-        return {
-            traceLength: bridge?.trace?.(11)?.length ?? 0,
-            redispatches: bridge?.stats?.()?.domRedispatches ?? 0,
-            coldBefore: !document.querySelector('#chat>.mes[mesid="11"]'),
-        };
-    });
-    check('historical reasoning collapse starts from cold state', collapseSetup.coldBefore);
-    await page.evaluate(() => window.echoReasoningControl.click());
-    await page.waitForFunction(() => window.echoReasoningControl?.closest('details')?.open === false, null, { timeout: 7000 });
-    await page.waitForFunction(() => !document.querySelector('#chat>.mes[mesid="11"]'), null, { timeout: 7000 });
-    const collapseEvidence = await page.evaluate(({ traceLength, redispatches }) => {
-        const bridge = SillyTavern?.[Symbol.for('echo.performance.native-cold-bridge')];
-        const trace = (bridge?.trace?.(11) ?? []).slice(traceLength);
-        const events = trace.map(entry => entry.event);
-        const coldReason = trace.some(entry => entry.event === 'operation-started' && String(entry.mountReason ?? '').startsWith('cold-dom-interaction:'));
-        const releaseAtZero = trace.some(entry => entry.event === 'release-requested' && entry.extra?.activeOperations === 0);
-        const detachedResult = trace.some(entry => entry.event === 'compact-result' && entry.extra?.result === 'detached');
-        return {
-            trace,
-            events,
-            coldReason,
-            releaseAtZero,
-            detachedResult,
-            redispatchDelta: (bridge?.stats?.()?.domRedispatches ?? 0) - redispatches,
-            detached: !document.querySelector('#chat>.mes[mesid="11"]'),
-            closedWhileDetached: window.echoReasoningControl?.closest('details')?.open === false,
-        };
-    }, collapseSetup);
-    evidence.reasoningCollapse = collapseEvidence;
-    check('historical reasoning collapse uses a new cold bridge lifecycle and detaches again', collapseSetup.coldBefore
-        && collapseEvidence.coldReason
-        && collapseEvidence.events.includes('mount-requested')
-        && collapseEvidence.events.includes('mount-finished')
-        && collapseEvidence.events.includes('operation-finished')
-        && collapseEvidence.events.includes('eligible-for-compact')
-        && collapseEvidence.events.includes('compact-attempted')
-        && collapseEvidence.releaseAtZero
-        && collapseEvidence.detachedResult
-        && collapseEvidence.redispatchDelta === 1
-        && collapseEvidence.detached
-        && collapseEvidence.closedWhileDetached);
+    await page.locator('#chat>.mes[mesid="11"] .mes_reasoning_header').scrollIntoViewIfNeeded();
+    await page.locator('#chat>.mes[mesid="11"] .mes_reasoning_header').click();
+    check('historical reasoning expands normally', await page.locator('#chat>.mes[mesid="11"] .mes_reasoning_details').evaluate(n => n.open && n.querySelector('.mes_reasoning').textContent.length > 0));
+    // Re-resolve the native control for collapse; legacy 150-message coverage does not assume
+    // the first operation's exact DOM node identity survives. Cold lifecycle is tested in P3B.
+    await page.locator('#chat>.mes[mesid="11"] .mes_reasoning_header').click();
+    check('historical reasoning collapses normally', await page.locator('#chat>.mes[mesid="11"] .mes_reasoning_details').evaluate(n => n.open === false));
     await page.evaluate(() => { document.querySelector('#chat').scrollTop = document.querySelector('#chat').scrollHeight; EchoPerformance.resume(); }); await settle();
     await page.keyboard.press('Control+f'); await page.keyboard.press('Escape');
     check('browser find restores normal layout and pauses optimization', await page.evaluate(() => {
