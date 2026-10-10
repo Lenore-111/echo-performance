@@ -49,7 +49,8 @@ const ready = async () => {
 const selectBench = () => page.evaluate(async()=>{ const s=await import('/script.js'); const id=s.characters.findIndex(c=>c.name==='Echo Bench'); if(id<0) throw new Error('Echo Bench missing'); await s.selectCharacterById(id); return id; });
 const snapshot = () => page.evaluate(() => { const c=SillyTavern.getContext(); return { chat:structuredClone(c.chat), store:structuredClone(c.chatMetadata.world_backstage_v1||null), echo:EchoPerformance.stats(), live:document.querySelectorAll('#chat > .mes').length }; });
 const core = store => { const s=store?.currentState||{}; return { clock:s.clock, people:s.people, events:s.events, locations:s.locations, publicImpactLedger:s.publicImpactLedger }; };
-const semantic = chat => chat.map(m => ({ mes:m?.mes, name:m?.name, is_user:m?.is_user, swipe_id:m?.swipe_id, swipes:m?.swipes, reasoning:m?.extra?.reasoning ?? m?.reasoning ?? null }));
+const normalizeReasoning = value => String(value ?? '').trim() || null;
+const semantic = chat => chat.map(m => ({ mes:m?.mes, name:m?.name, is_user:m?.is_user, swipe_id:m?.swipe_id, swipes:m?.swipes, reasoning:normalizeReasoning(m?.extra?.reasoning ?? m?.reasoning) }));
 const diffSemantic = (before, after, limit = 24) => {
     const rows=[];
     const length=Math.max(before.length, after.length);
