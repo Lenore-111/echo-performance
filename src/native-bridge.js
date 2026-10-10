@@ -1,4 +1,5 @@
 const BRIDGE_MARK = Symbol.for('echo.performance.native-cold-bridge');
+const COMMAND_BRIDGE_MARK = Symbol.for('echo.performance.chat-jump-bridge');
 const PIN_MS = 2600;
 const COLD_CLICK_SELECTOR = [
     '.mes_edit',
@@ -55,6 +56,11 @@ function extractChatJumpTarget(value) {
     return Number.isInteger(id) && id >= 0 ? id : null;
 }
 
+function commandTarget(value) {
+    const id = Number(value);
+    return Number.isInteger(id) && id >= 0 ? id : null;
+}
+
 export function installNativeColdBridge(viewport, nativeGetContext) {
     if (!viewport || typeof nativeGetContext !== 'function' || !globalThis.SillyTavern) {
         return { attachCurrent: () => {}, lifecycle: () => {}, stats: () => ({ installed: false }) };
@@ -69,7 +75,11 @@ export function installNativeColdBridge(viewport, nativeGetContext) {
         domRedispatches: 0,
         jumpPreMounts: 0,
         jumpFallbackScrolls: 0,
+        commandBridgeInstalled: false,
+        commandBridgeInvocations: 0,
     };
+    let commandBridgeAttempts = 0;
+    let commandBridgeTimer = null;
 
     function pinChunk(mesId) {
         const chunk = viewport.messageToChunk?.get?.(Number(mesId));
@@ -118,16 +128,59 @@ export function installNativeColdBridge(viewport, nativeGetContext) {
     async function finalizeJump(target) {
         await twoFrames();
         const root = viewport.root;
-        if (!(root instanceof HTMLElement)) return;
+        if (!(root instanceof HTMLElement)) return false;
         const matches = [...root.querySelectorAll(`:scope > .mes[mesid="${target}"]`)];
-        if (matches.length !== 1) return;
+        if (matches.length !== 1) return false;
         const node = matches[0];
-        if (!(node instanceof HTMLElement)) return;
+        if (!(node instanceof HTMLElement)) return false;
         if (!visibleInRoot(root, node)) {
             node.scrollIntoView({ block: 'center', inline: 'nearest', behavior: 'auto' });
             bridgeStats.jumpFallbackScrolls += 1;
             await twoFrames();
         }
+        return visibleInRoot(root, node);
+    }
+
+    async function installChatJumpCommandBridge() {
+        if (bridgeStats.commandBridgeInstalled) return true;
+        commandBridgeAttempts += 1;
+        try {
+            const { SlashCommandParser } = await import('/scripts/slash-commands/SlashCommandParser.js');
+            const command = SlashCommandParser?.commands?.['chat-jump'];
+            if (!command || typeof command.callback !== 'function') return false;
+            if (command[COMMAND_BRIDGE_MARK]) {
+                bridgeStats.commandBridgeInstalled = true;
+                return true;
+            }
+
+            const originalCallback = command.callback;
+            command.callback = async function (args, index) {
+                const target = commandTarget(index);
+                if (target !== null) {
+                    const mounted = ensure(target, 'native-chat-jump-command');
+                    if (mounted instanceof HTMLElement) bridgeStats.jumpPreMounts += 1;
+                }
+                bridgeStats.commandBridgeInvocations += 1;
+                const result = await Reflect.apply(originalCallback, this, [args, index]);
+                if (target !== null) await finalizeJump(target);
+                return result;
+            };
+            Object.defineProperty(command, COMMAND_BRIDGE_MARK, { value: true, configurable: false });
+            bridgeStats.commandBridgeInstalled = true;
+            return true;
+        } catch (error) {
+            console.warn('[Echo Performance] Could not install chat-jump bridge yet.', error);
+            return false;
+        }
+    }
+
+    function scheduleCommandBridge() {
+        if (bridgeStats.commandBridgeInstalled || commandBridgeTimer !== null || commandBridgeAttempts >= 20) return;
+        commandBridgeTimer = setTimeout(async () => {
+            commandBridgeTimer = null;
+            const installed = await installChatJumpCommandBridge();
+            if (!installed) scheduleCommandBridge();
+        }, commandBridgeAttempts ? 100 : 0);
     }
 
     function bridgeContext(context) {
@@ -192,15 +245,18 @@ export function installNativeColdBridge(viewport, nativeGetContext) {
     const bridge = {
         attachCurrent,
         ensure,
+        finalizeJump,
         lifecycle(type) {
             if (['CHAT_CHANGED', 'CHAT_LOADED', 'MORE_MESSAGES_LOADED', 'USER_MESSAGE_RENDERED', 'CHARACTER_MESSAGE_RENDERED', 'TOOL_CALLS_RENDERED'].includes(type)) {
                 queueMicrotask(attachCurrent);
             }
+            if (['CHAT_CHANGED', 'CHAT_LOADED'].includes(type)) scheduleCommandBridge();
         },
         stats: () => ({ ...bridgeStats }),
     };
 
     globalThis.SillyTavern[BRIDGE_MARK] = bridge;
     attachCurrent();
+    scheduleCommandBridge();
     return bridge;
 }
