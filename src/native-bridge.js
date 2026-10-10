@@ -318,9 +318,6 @@ export function installNativeColdBridge(viewport, nativeGetContext) {
         }
         const active = document.activeElement;
         if (active instanceof Element && chunk.nodes.some(node => node.contains(active))) return 'focus-lock';
-        if (String(record?.mountReason ?? '').includes('reasoning') && chunk.nodes.some(node => node.querySelector?.('details[open]'))) {
-            return 'reasoning-open';
-        }
         return null;
     }
 
