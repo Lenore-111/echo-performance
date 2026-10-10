@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "check": "node --check index.js && node --check src/dom-compact.js && node --check src/native-bridge.js && node --check src/viewport.js && node --check .lab/benchmark.mjs && node --check .lab/dom-compact-smoke.mjs && node --check .lab/phase3-bridge-smoke.mjs && node --check .lab/phase3-bridge-smoke-v2.mjs && node --check .lab/phase3-bridge-smoke-v3.mjs && node --check .lab/phase3-bridge-smoke-v4.mjs && node --check .lab/phase3-bridge-smoke-v5.mjs && node --check .lab/phase3-observer-compare.mjs && node --check .lab/phase3-slash-observer-control.mjs && node --check .lab/phase3-metrics.mjs && node --check .lab/phase3-lifecycle.mjs && node --check .lab/phase3-world.mjs && node --check .lab/phase3-world-rerun.mjs && node --check .lab/phase3-world-v2.mjs",
+    "check": "node --check index.js && node --check src/dom-compact.js && node --check src/native-bridge.js && node --check src/profiler.js && node --check src/viewport.js && node --check .lab/benchmark.mjs && node --check .lab/dom-compact-smoke.mjs && node --check .lab/phase3-bridge-smoke.mjs && node --check .lab/phase3-bridge-smoke-v2.mjs && node --check .lab/phase3-bridge-smoke-v3.mjs && node --check .lab/phase3-bridge-smoke-v4.mjs && node --check .lab/phase3-bridge-smoke-v5.mjs && node --check .lab/phase3-observer-compare.mjs && node --check .lab/phase3-slash-observer-control.mjs && node --check .lab/phase3-metrics.mjs && node --check .lab/phase3-lifecycle.mjs && node --check .lab/phase3-world.mjs && node --check .lab/phase3-world-rerun.mjs && node --check .lab/phase3-world-v2.mjs",
     "bench": "node .lab/benchmark.mjs"
   }
 }
