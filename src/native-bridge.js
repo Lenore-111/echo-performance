@@ -69,21 +69,48 @@ export function installNativeColdBridge(viewport, nativeGetContext) {
     if (globalThis.SillyTavern[BRIDGE_MARK]) return globalThis.SillyTavern[BRIDGE_MARK];
 
     const attachedShells = new WeakSet();
+    const pinTimers = new Map();
     const bridgeStats = {
         installed: true,
         apiMounts: 0,
         domRedispatches: 0,
         jumpPreMounts: 0,
         jumpFallbackScrolls: 0,
+        inputPreMounts: 0,
+        deferredCompacts: 0,
         commandBridgeInstalled: false,
         commandBridgeInvocations: 0,
     };
     let commandBridgeAttempts = 0;
     let commandBridgeTimer = null;
 
+    function scheduleAfterPin(chunk) {
+        if (!chunk) return;
+        const previous = pinTimers.get(chunk);
+        if (previous !== undefined) clearTimeout(previous);
+
+        const run = () => {
+            const remaining = Number(chunk.pinUntil || 0) - performance.now();
+            if (remaining > 16) {
+                pinTimers.set(chunk, setTimeout(run, Math.ceil(remaining) + 24));
+                return;
+            }
+            pinTimers.delete(chunk);
+            if (!viewport.enabled || viewport.paused || viewport.generating) return;
+            bridgeStats.deferredCompacts += 1;
+            viewport.scheduleCompact?.(0);
+        };
+
+        const delay = Math.max(24, Math.ceil(Number(chunk.pinUntil || 0) - performance.now()) + 24);
+        pinTimers.set(chunk, setTimeout(run, delay));
+    }
+
     function pinChunk(mesId) {
         const chunk = viewport.messageToChunk?.get?.(Number(mesId));
-        if (chunk) chunk.pinUntil = Math.max(Number(chunk.pinUntil || 0), performance.now() + PIN_MS);
+        if (!chunk) return null;
+        chunk.pinUntil = Math.max(Number(chunk.pinUntil || 0), performance.now() + PIN_MS);
+        scheduleAfterPin(chunk);
+        return chunk;
     }
 
     function ensure(mesId, reason) {
@@ -142,7 +169,6 @@ export function installNativeColdBridge(viewport, nativeGetContext) {
     }
 
     async function installChatJumpCommandBridge() {
-        if (bridgeStats.commandBridgeInstalled) return true;
         commandBridgeAttempts += 1;
         try {
             const { SlashCommandParser } = await import('/scripts/slash-commands/SlashCommandParser.js');
@@ -174,13 +200,13 @@ export function installNativeColdBridge(viewport, nativeGetContext) {
         }
     }
 
-    function scheduleCommandBridge() {
-        if (bridgeStats.commandBridgeInstalled || commandBridgeTimer !== null || commandBridgeAttempts >= 20) return;
+    function scheduleCommandBridge(delay = 0) {
+        if (commandBridgeTimer !== null) clearTimeout(commandBridgeTimer);
         commandBridgeTimer = setTimeout(async () => {
             commandBridgeTimer = null;
             const installed = await installChatJumpCommandBridge();
-            if (!installed) scheduleCommandBridge();
-        }, commandBridgeAttempts ? 100 : 0);
+            if (!installed && commandBridgeAttempts < 20) scheduleCommandBridge(120);
+        }, Math.max(0, delay));
     }
 
     function bridgeContext(context) {
@@ -239,6 +265,19 @@ export function installNativeColdBridge(viewport, nativeGetContext) {
         return bridged;
     }
 
+    const onChatInput = event => {
+        const input = event.target;
+        if (!(input instanceof HTMLTextAreaElement) || input.id !== 'send_textarea') return;
+        const target = extractChatJumpTarget(input.value);
+        if (target === null) return;
+        const mounted = ensure(target, 'native-chat-jump-input');
+        if (mounted instanceof HTMLElement) bridgeStats.inputPreMounts += 1;
+        // Re-verify the currently registered command object after user input. Some
+        // SillyTavern startup paths populate the registry after extensions load.
+        scheduleCommandBridge(0);
+    };
+    document.addEventListener('input', onChatInput, true);
+
     const bridgedGetContext = () => bridgeContext(nativeGetContext());
     globalThis.SillyTavern.getContext = bridgedGetContext;
 
@@ -250,13 +289,13 @@ export function installNativeColdBridge(viewport, nativeGetContext) {
             if (['CHAT_CHANGED', 'CHAT_LOADED', 'MORE_MESSAGES_LOADED', 'USER_MESSAGE_RENDERED', 'CHARACTER_MESSAGE_RENDERED', 'TOOL_CALLS_RENDERED'].includes(type)) {
                 queueMicrotask(attachCurrent);
             }
-            if (['CHAT_CHANGED', 'CHAT_LOADED'].includes(type)) scheduleCommandBridge();
+            if (['CHAT_CHANGED', 'CHAT_LOADED'].includes(type)) scheduleCommandBridge(0);
         },
         stats: () => ({ ...bridgeStats }),
     };
 
     globalThis.SillyTavern[BRIDGE_MARK] = bridge;
     attachCurrent();
-    scheduleCommandBridge();
+    scheduleCommandBridge(0);
     return bridge;
 }
