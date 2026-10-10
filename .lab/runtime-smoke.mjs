@@ -125,7 +125,13 @@ try {
     await page.locator('#chat>.mes[mesid="11"] .mes_reasoning_header').click();
     await page.evaluate(() => { document.querySelector('#chat').scrollTop = document.querySelector('#chat').scrollHeight; EchoPerformance.resume(); }); await settle();
     await page.keyboard.press('Control+f'); await page.keyboard.press('Escape');
-    check('browser find restores normal layout and pauses optimization', await page.evaluate(() => EchoPerformance.stats().paused && EchoPerformance.stats().deferredMessages === 0 && [...document.querySelectorAll('#chat>.mes .mes_text')].every(t => t.textContent.length > 0)));
+    check('browser find restores normal layout and pauses optimization', await page.evaluate(() => {
+        const stats = EchoPerformance.stats();
+        return stats.paused
+            && stats.detachedMessageShells === 0
+            && stats.liveMessageShells === SillyTavern.getContext().chat.length
+            && [...document.querySelectorAll('#chat>.mes .mes_text')].every(t => t.textContent.length > 0);
+    }));
     await page.evaluate(() => EchoPerformance.resume()); await settle();
     let generationRequests = 0;
     await page.route('**/api/backends/chat-completions/generate', async route => {
