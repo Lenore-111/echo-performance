@@ -1,14 +1,17 @@
 import { DomCompactor } from './src/dom-compact.js';
+import { installNativeColdBridge } from './src/native-bridge.js';
 
 function start() {
     if (window.EchoPerformance) return;
-    const getContext = () => SillyTavern.getContext();
+    const nativeGetContext = SillyTavern.getContext.bind(SillyTavern);
+    const getContext = () => nativeGetContext();
     const context = getContext();
     const root = document.querySelector('#chat');
     if (!root || !context.eventSource?.makeFirst) return;
 
     const settings = context.extensionSettings.echo_performance ??= { enabled: false };
     const viewport = new DomCompactor(root, getContext);
+    const bridge = installNativeColdBridge(viewport, nativeGetContext);
     const { eventSource, eventTypes } = context;
 
     const eventNames = [
@@ -22,7 +25,10 @@ function start() {
 
     for (const key of eventNames) {
         if (!eventTypes[key]) continue;
-        eventSource.makeFirst(eventTypes[key], (...args) => viewport.lifecycle(key, ...args));
+        eventSource.makeFirst(eventTypes[key], (...args) => {
+            bridge.lifecycle(key, ...args);
+            viewport.lifecycle(key, ...args);
+        });
     }
 
     eventSource.makeFirst(eventTypes.GENERATION_STARTED, (_type, _options, dryRun) => {
@@ -52,6 +58,7 @@ function start() {
 
     const setEnabled = (enabled, persist = false) => {
         viewport.setEnabled(enabled);
+        bridge.attachCurrent();
         checkbox.checked = viewport.enabled;
         if (persist) {
             settings.enabled = viewport.enabled;
@@ -105,7 +112,7 @@ function start() {
             else viewport.resume();
             showStatus();
         },
-        stats: () => viewport.stats(),
+        stats: () => ({ ...viewport.stats(), bridge: bridge.stats() }),
         ensureMessageMounted: (mesId, reason = 'external-request') => viewport.ensureMessageMounted(mesId, { reason }),
         pin: shell => viewport.pin(shell),
     });
