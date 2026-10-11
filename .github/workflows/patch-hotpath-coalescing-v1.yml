@@ -1,0 +1,72 @@
+name: Apply Echo hot-path coalescing v1
+
+on:
+  push:
+    branches:
+      - feature/echo-performance-long-chat
+    paths:
+      - '.github/workflows/patch-hotpath-coalescing-v1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/echo-performance-long-chat
+          fetch-depth: 0
+
+      - name: Patch hot-path mutation filtering and timer coalescing
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          def replace_once(path, old, new):
+              p = Path(path)
+              text = p.read_text(encoding='utf-8')
+              count = text.count(old)
+              if count != 1:
+                  raise SystemExit(f'{path}: expected exactly one replacement, found {count}')
+              p.write_text(text.replace(old, new), encoding='utf-8')
+
+          dom = 'src/dom-compact.js'
+          replace_once(dom,
+          """        this.compactTimer = null;\n        this.compactFrame = null;\n""",
+          """        this.compactTimer = null;\n        this.compactDeadline = 0;\n        this.compactFrame = null;\n""")
+
+          replace_once(dom,
+          """            if (this.internalMutation || !this.enabled) return;\n            let directStructureChanged = false;\n            for (const record of records) {\n""",
+          """            if (this.internalMutation || !this.enabled) return;\n            let directStructureChanged = false;\n            let trackedChunkChanged = false;\n            for (const record of records) {\n""")
+
+          replace_once(dom,
+          """                const chunk = id === null ? null : this.messageToChunk.get(id);\n                if (chunk) chunk.dirty = true;\n            }\n            if (directStructureChanged && !this.generating) this.scheduleBuild();\n            this.scheduleCompact();\n""",
+          """                const chunk = id === null ? null : this.messageToChunk.get(id);\n                if (chunk) {\n                    chunk.dirty = true;\n                    trackedChunkChanged = true;\n                }\n            }\n            if (directStructureChanged && !this.generating) this.scheduleBuild();\n            // Ignore character/style churn inside untracked hot messages. Dynamic\n            // status blocks and theme widgets can mutate frequently without changing\n            // any cold chunk, so waking compaction for those updates only adds jank.\n            if (directStructureChanged || trackedChunkChanged) this.scheduleCompact();\n""")
+
+          replace_once(dom,
+          """    scheduleCompact(delay = COMPACT_DELAY_MS) {\n        if (!this.enabled || this.paused || this.generating) return;\n        clearTimeout(this.compactTimer);\n        this.compactTimer = setTimeout(() => {\n            this.compactTimer = null;\n            if (this.compactFrame) cancelAnimationFrame(this.compactFrame);\n            this.performanceCounters.rAFSchedules += 1;\n            this.compactFrame = requestAnimationFrame(() => {\n                this.compactFrame = null;\n                this.compactFarChunks();\n            });\n        }, delay);\n    }\n""",
+          """    scheduleCompact(delay = COMPACT_DELAY_MS) {\n        if (!this.enabled || this.paused || this.generating) return;\n        const wait = Math.max(0, Number(delay) || 0);\n        const requestedDeadline = performance.now() + wait;\n        if (!this.compactDeadline || wait === 0) this.compactDeadline = requestedDeadline;\n        else this.compactDeadline = Math.max(this.compactDeadline, requestedDeadline);\n\n        const runWhenDue = () => {\n            const remaining = this.compactDeadline - performance.now();\n            if (remaining > 4) {\n                this.compactTimer = setTimeout(runWhenDue, remaining);\n                return;\n            }\n            this.compactTimer = null;\n            this.compactDeadline = 0;\n            if (!this.enabled || this.paused || this.generating) return;\n            if (this.compactFrame) cancelAnimationFrame(this.compactFrame);\n            this.performanceCounters.rAFSchedules += 1;\n            this.compactFrame = requestAnimationFrame(() => {\n                this.compactFrame = null;\n                this.compactFarChunks();\n            });\n        };\n\n        if (this.compactTimer !== null) {\n            // Normal scroll/mutation traffic only extends the trailing deadline.\n            // An explicit zero-delay request still preempts the pending timer.\n            if (wait !== 0) return;\n            clearTimeout(this.compactTimer);\n            this.compactTimer = null;\n        }\n        this.compactTimer = setTimeout(runWhenDue, Math.max(0, this.compactDeadline - performance.now()));\n    }\n""")
+
+          replace_once(dom,
+          """        this.compactTimer = null;\n        this.buildTimer = null;\n        this.compactFrame = null;\n""",
+          """        this.compactTimer = null;\n        this.compactDeadline = 0;\n        this.buildTimer = null;\n        this.compactFrame = null;\n""")
+          PY
+
+      - name: Static checks
+        run: npm run check
+
+      - name: Commit patch and remove one-shot workflow
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'Echo Performance CI'
+          git config user.email 'actions@users.noreply.github.com'
+          git rm .github/workflows/patch-hotpath-coalescing-v1.yml
+          git add src/dom-compact.js
+          git diff --cached --check
+          git commit -m 'perf: coalesce compact timers and ignore hot message churn'
+          git push origin HEAD:feature/echo-performance-long-chat
