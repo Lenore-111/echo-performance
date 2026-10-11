@@ -1,0 +1,89 @@
+name: Apply Echo idle hot-path patch v2
+
+on:
+  push:
+    branches:
+      - feature/echo-performance-long-chat
+    paths:
+      - '.github/workflows/patch-idle-hotpaths-v2.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/echo-performance-long-chat
+          fetch-depth: 0
+
+      - name: Apply scoped patch
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          def r(path, old, new):
+              p = Path(path)
+              text = p.read_text(encoding='utf-8')
+              count = text.count(old)
+              if count != 1:
+                  raise SystemExit(f'{path}: expected 1 match, found {count}: {old[:80]!r}')
+              p.write_text(text.replace(old, new), encoding='utf-8')
+
+          b = 'src/native-bridge.js'
+          r(b,
+            "        safetyReleases: 0,\n    };\n    let commandBridgeAttempts = 0;\n    let commandBridgeTimer = null;\n    let releaseSweepFrame = null;\n",
+            "        safetyReleases: 0,\n        getContextCalls: 0,\n        bridgeContextCalls: 0,\n        releaseSweepSchedules: 0,\n        releaseSweepRuns: 0,\n        rAFSchedules: 0,\n        traceWrites: 0,\n        geometryTraceReads: 0,\n    };\n    let commandBridgeAttempts = 0;\n    let commandBridgeTimer = null;\n    let releaseSweepFrame = null;\n    let traceGeometryEnabled = false;\n")
+          r(b,
+            "    function chunkEligibility(chunk) {\n        if (!chunk) return null;\n",
+            "    function chunkEligibility(chunk) {\n        if (!chunk) return null;\n        bridgeStats.geometryTraceReads += 1;\n")
+          r(b,
+            "    function pushTrace(event, { mesId = null, chunk = null, reason = null, releaseReason = null, extra = null } = {}) {\n        const id = Number(mesId);\n",
+            "    function pushTrace(event, { mesId = null, chunk = null, reason = null, releaseReason = null, extra = null } = {}) {\n        bridgeStats.traceWrites += 1;\n        const id = Number(mesId);\n")
+          r(b, "            eligibility: chunkEligibility(chunk),\n", "            eligibility: traceGeometryEnabled ? chunkEligibility(chunk) : null,\n")
+          r(b,
+            "    function observeCompactResult(record, chunk) {\n        setTimeout(() => {\n            requestAnimationFrame(() => requestAnimationFrame(() => {\n",
+            "    function observeCompactResult(record, chunk) {\n        bridgeStats.rAFSchedules += 2;\n        setTimeout(() => {\n            requestAnimationFrame(() => requestAnimationFrame(() => {\n")
+          r(b,
+            "    function runReleaseSweep() {\n        releaseSweepFrame = null;\n        for (const record of [...temporaryMounts.values()]) {\n            if (record.releaseRequested) attemptRelease(record);\n        }\n    }\n\n    function scheduleReleaseSweep() {\n        if (releaseSweepFrame !== null) return;\n        releaseSweepFrame = requestAnimationFrame(() => {\n            releaseSweepFrame = requestAnimationFrame(runReleaseSweep);\n        });\n    }\n",
+            "    function runReleaseSweep() {\n        releaseSweepFrame = null;\n        bridgeStats.releaseSweepRuns += 1;\n        if (!temporaryMounts.size) return;\n        for (const record of [...temporaryMounts.values()]) {\n            if (record.releaseRequested) attemptRelease(record);\n        }\n    }\n\n    function scheduleReleaseSweep() {\n        if (!temporaryMounts.size || releaseSweepFrame !== null) return;\n        bridgeStats.releaseSweepSchedules += 1;\n        bridgeStats.rAFSchedules += 2;\n        releaseSweepFrame = requestAnimationFrame(() => {\n            releaseSweepFrame = requestAnimationFrame(runReleaseSweep);\n        });\n    }\n")
+          r(b,
+            "    const bridgedGetContext = () => bridgeContext(nativeGetContext());\n",
+            "    const bridgedGetContext = () => {\n        bridgeStats.getContextCalls += 1;\n        bridgeStats.bridgeContextCalls += 1;\n        return bridgeContext(nativeGetContext());\n    };\n")
+          r(b,
+            "        temporaryMounts: () => [...temporaryMounts.values()].map(record => snapshotRecord(record)),\n        stats: () => ({\n",
+            "        temporaryMounts: () => [...temporaryMounts.values()].map(record => snapshotRecord(record)),\n        setTraceGeometry(enabled) {\n            traceGeometryEnabled = Boolean(enabled);\n            return traceGeometryEnabled;\n        },\n        stats: () => ({\n")
+
+          p = 'src/profiler.js'
+          r(p,
+            "    const bridgedGetContext = globalThis.SillyTavern?.getContext;\n    if (typeof bridgedGetContext === 'function') {\n        const countedGetContext = function (...args) {\n            counters.getContextCalls += 1;\n            counters.bridgeContextCalls += 1;\n            return Reflect.apply(bridgedGetContext, this, args);\n        };\n        globalThis.SillyTavern.getContext = countedGetContext;\n        originals.push(() => {\n            if (globalThis.SillyTavern?.getContext === countedGetContext) globalThis.SillyTavern.getContext = bridgedGetContext;\n        });\n    }\n\n",
+            '')
+          r(p,
+            "        expensive = next;\n        stopExpensiveObservers();\n        if (!expensive || typeof PerformanceObserver === 'undefined') return expensive;\n",
+            "        expensive = next;\n        stopExpensiveObservers();\n        bridge?.setTraceGeometry?.(expensive);\n        if (!expensive || typeof PerformanceObserver === 'undefined') return expensive;\n")
+          r(p,
+            "        const bridgeStats = bridge?.stats?.() ?? {};\n        const traceCount = Number(bridgeStats.traceCount);\n        if (Number.isFinite(traceCount)) counters.traceWrites = traceCount;\n\n        return {\n",
+            "        const bridgeStats = bridge?.stats?.() ?? {};\n        for (const key of [\n            'getContextCalls', 'bridgeContextCalls',\n            'releaseSweepSchedules', 'releaseSweepRuns',\n            'rAFSchedules', 'traceWrites', 'geometryTraceReads',\n        ]) {\n            const value = Number(bridgeStats[key]);\n            if (Number.isFinite(value)) counters[key] = value;\n        }\n\n        return {\n")
+          r(p,
+            "        dispose() {\n            stopExpensiveObservers();\n            for (const restore of originals.reverse()) restore();\n",
+            "        dispose() {\n            stopExpensiveObservers();\n            bridge?.setTraceGeometry?.(false);\n            for (const restore of originals.reverse()) restore();\n")
+          PY
+
+      - name: Verify
+        run: |
+          npm run check
+          git diff --check
+
+      - name: Commit
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'Echo Performance CI'
+          git config user.email 'actions@users.noreply.github.com'
+          git add src/native-bridge.js src/profiler.js
+          git commit -m 'perf: idle fast path and bridge-owned profiler counters'
+          git push origin HEAD:feature/echo-performance-long-chat
