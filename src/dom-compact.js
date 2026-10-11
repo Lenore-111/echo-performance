@@ -191,6 +191,7 @@ export class DomCompactor {
         this.connectResizeObserver();
         this.scheduleBuild(0);
         this.scheduleCompact();
+        this.scheduleDeepColdTrim();
         this.onStateChange?.();
     }
 
@@ -212,6 +213,7 @@ export class DomCompactor {
         this.connectResizeObserver();
         this.scheduleBuild(0);
         this.scheduleCompact();
+        this.scheduleDeepColdTrim();
         this.onStateChange?.();
     }
 
@@ -478,7 +480,10 @@ export class DomCompactor {
         const detached = this.chunks
             .filter(chunk => !chunk.mounted && !chunk.deepCold && chunk.nodes.length)
             .sort((a, b) => b.endId - a.endId);
-        return detached.slice(RETAINED_DETACHED_DOM_CHUNKS).reverse();
+        return detached
+            .slice(RETAINED_DETACHED_DOM_CHUNKS)
+            .reverse()
+            .filter(chunk => this.canDeepFreezeChunk(chunk));
     }
 
     canDeepFreezeChunk(chunk) {
