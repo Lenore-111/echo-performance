@@ -47,8 +47,21 @@ export class DomCompactor {
         this.nativeReconciliations = 0;
         this.restoreSamples = [];
         this.onStateChange = null;
+        this.performanceCounters = {
+            mutationCallbacks: 0,
+            mutationRecords: 0,
+            intersectionObserverCallbacks: 0,
+            intersectionObserverEntries: 0,
+            resizeObserverCallbacks: 0,
+            resizeObserverEntries: 0,
+            observerCallbacks: 0,
+            rAFSchedules: 0,
+        };
 
         this.placeholderObserver = new IntersectionObserver(entries => {
+            this.performanceCounters.intersectionObserverCallbacks += 1;
+            this.performanceCounters.intersectionObserverEntries += entries.length;
+            this.performanceCounters.observerCallbacks += 1;
             if (!this.enabled || this.paused || this.generating) return;
             const candidates = entries
                 .filter(entry => entry.isIntersecting)
@@ -64,6 +77,9 @@ export class DomCompactor {
         }, { root, rootMargin: `${PRELOAD_MARGIN_PX}px 0px`, threshold: 0 });
 
         this.mutations = new MutationObserver(records => {
+            this.performanceCounters.mutationCallbacks += 1;
+            this.performanceCounters.mutationRecords += records.length;
+            this.performanceCounters.observerCallbacks += 1;
             if (this.internalMutation || !this.enabled) return;
             let directStructureChanged = false;
             for (const record of records) {
@@ -79,7 +95,10 @@ export class DomCompactor {
             this.scheduleCompact();
         });
 
-        this.resize = new ResizeObserver(() => {
+        this.resize = new ResizeObserver(entries => {
+            this.performanceCounters.resizeObserverCallbacks += 1;
+            this.performanceCounters.resizeObserverEntries += entries.length;
+            this.performanceCounters.observerCallbacks += 1;
             const width = this.root.clientWidth;
             if (!this.enabled || !width || Math.abs(width - this.width) < 1) return;
             this.width = width;
@@ -206,6 +225,7 @@ export class DomCompactor {
         this.compactTimer = setTimeout(() => {
             this.compactTimer = null;
             if (this.compactFrame) cancelAnimationFrame(this.compactFrame);
+            this.performanceCounters.rAFSchedules += 1;
             this.compactFrame = requestAnimationFrame(() => {
                 this.compactFrame = null;
                 this.compactFarChunks();
@@ -581,6 +601,7 @@ export class DomCompactor {
     rebuildFromLiveDom(reason = 'rebuild') {
         if (!this.enabled || this.paused || this.generating) return;
         this.restoreAll({ clear: true, reason });
+        this.performanceCounters.rAFSchedules += 2;
         requestAnimationFrame(() => requestAnimationFrame(() => this.scheduleBuild(0)));
     }
 
@@ -608,7 +629,11 @@ export class DomCompactor {
         if (chunk && !chunk.mounted) this.restoreChunk(chunk, { reason: 'pin' });
     }
 
-    stats() {
+    performanceStats() {
+        return { ...this.performanceCounters };
+    }
+
+    stats({ includeDomScan = true } = {}) {
         const liveMessages = directMessages(this.root).length;
         const detachedMessages = this.chunks.reduce((count, chunk) => count + (chunk.mounted ? 0 : chunk.nodes.length), 0);
         const mountedColdMessages = this.chunks.reduce((count, chunk) => count + (chunk.mounted ? chunk.nodes.length : 0), 0);
@@ -625,7 +650,8 @@ export class DomCompactor {
             detachedChunks: this.chunks.filter(chunk => !chunk.mounted).length,
             mountedColdChunks: this.chunks.filter(chunk => chunk.mounted).length,
             placeholderCount: this.root.querySelectorAll(':scope > .echo-dom-chunk-placeholder').length,
-            liveChatElements: this.root.querySelectorAll('*').length,
+            liveChatElements: includeDomScan ? this.root.querySelectorAll('*').length : null,
+            performanceCounters: this.performanceStats(),
             nativeReconciliations: this.nativeReconciliations,
             lastCompactDurationMs: this.lastCompactDurationMs,
             lastReconcileDurationMs: this.lastReconcileDurationMs,
