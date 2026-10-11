@@ -85,10 +85,18 @@ export function installNativeColdBridge(viewport, nativeGetContext) {
         commandBridgeInstalled: false,
         commandBridgeInvocations: 0,
         safetyReleases: 0,
+        getContextCalls: 0,
+        bridgeContextCalls: 0,
+        releaseSweepSchedules: 0,
+        releaseSweepRuns: 0,
+        rAFSchedules: 0,
+        traceWrites: 0,
+        geometryTraceReads: 0,
     };
     let commandBridgeAttempts = 0;
     let commandBridgeTimer = null;
     let releaseSweepFrame = null;
+    let traceGeometryEnabled = false;
 
     function describeActiveElement(chunk) {
         const active = document.activeElement;
@@ -106,6 +114,7 @@ export function installNativeColdBridge(viewport, nativeGetContext) {
 
     function chunkEligibility(chunk) {
         if (!chunk) return null;
+        bridgeStats.geometryTraceReads += 1;
         const root = viewport.root;
         const connected = chunk.nodes.filter(node => node.parentElement === root);
         const rootRect = root instanceof HTMLElement ? root.getBoundingClientRect() : null;
@@ -155,6 +164,7 @@ export function installNativeColdBridge(viewport, nativeGetContext) {
     }
 
     function pushTrace(event, { mesId = null, chunk = null, reason = null, releaseReason = null, extra = null } = {}) {
+        bridgeStats.traceWrites += 1;
         const id = Number(mesId);
         const record = Number.isInteger(id) ? temporaryMounts.get(id) ?? null : null;
         lifecycleTrace.push({
@@ -165,7 +175,7 @@ export function installNativeColdBridge(viewport, nativeGetContext) {
             mountReason: reason ?? record?.mountReason ?? null,
             releaseReason,
             temporaryMount: snapshotRecord(record),
-            eligibility: chunkEligibility(chunk),
+            eligibility: traceGeometryEnabled ? chunkEligibility(chunk) : null,
             extra,
         });
         if (lifecycleTrace.length > TRACE_LIMIT) lifecycleTrace.splice(0, lifecycleTrace.length - TRACE_LIMIT);
@@ -378,6 +388,7 @@ export function installNativeColdBridge(viewport, nativeGetContext) {
     }
 
     function observeCompactResult(record, chunk) {
+        bridgeStats.rAFSchedules += 2;
         setTimeout(() => {
             requestAnimationFrame(() => requestAnimationFrame(() => {
                 const current = temporaryMounts.get(record.mesId);
@@ -448,13 +459,17 @@ export function installNativeColdBridge(viewport, nativeGetContext) {
 
     function runReleaseSweep() {
         releaseSweepFrame = null;
+        bridgeStats.releaseSweepRuns += 1;
+        if (!temporaryMounts.size) return;
         for (const record of [...temporaryMounts.values()]) {
             if (record.releaseRequested) attemptRelease(record);
         }
     }
 
     function scheduleReleaseSweep() {
-        if (releaseSweepFrame !== null) return;
+        if (!temporaryMounts.size || releaseSweepFrame !== null) return;
+        bridgeStats.releaseSweepSchedules += 1;
+        bridgeStats.rAFSchedules += 2;
         releaseSweepFrame = requestAnimationFrame(() => {
             releaseSweepFrame = requestAnimationFrame(runReleaseSweep);
         });
@@ -724,7 +739,11 @@ export function installNativeColdBridge(viewport, nativeGetContext) {
     }
     viewport.root?.addEventListener?.('scroll', onReleaseRelevantEvent, { passive: true });
 
-    const bridgedGetContext = () => bridgeContext(nativeGetContext());
+    const bridgedGetContext = () => {
+        bridgeStats.getContextCalls += 1;
+        bridgeStats.bridgeContextCalls += 1;
+        return bridgeContext(nativeGetContext());
+    };
     globalThis.SillyTavern.getContext = bridgedGetContext;
 
     const bridge = {
@@ -741,6 +760,10 @@ export function installNativeColdBridge(viewport, nativeGetContext) {
         },
         trace: mesId => lifecycleTrace.filter(entry => mesId == null || entry.mesId === Number(mesId)).map(entry => structuredClone(entry)),
         temporaryMounts: () => [...temporaryMounts.values()].map(record => snapshotRecord(record)),
+        setTraceGeometry(enabled) {
+            traceGeometryEnabled = Boolean(enabled);
+            return traceGeometryEnabled;
+        },
         stats: () => ({
             ...bridgeStats,
             temporaryMountCount: temporaryMounts.size,

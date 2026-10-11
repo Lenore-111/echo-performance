@@ -81,19 +81,6 @@ export function installLightweightProfiler({ viewport, bridge, root }) {
         return Reflect.apply(original, this, [mesId, ...args]);
     });
 
-    const bridgedGetContext = globalThis.SillyTavern?.getContext;
-    if (typeof bridgedGetContext === 'function') {
-        const countedGetContext = function (...args) {
-            counters.getContextCalls += 1;
-            counters.bridgeContextCalls += 1;
-            return Reflect.apply(bridgedGetContext, this, args);
-        };
-        globalThis.SillyTavern.getContext = countedGetContext;
-        originals.push(() => {
-            if (globalThis.SillyTavern?.getContext === countedGetContext) globalThis.SillyTavern.getContext = bridgedGetContext;
-        });
-    }
-
     function stopExpensiveObservers() {
         longTaskObserver?.disconnect();
         eventObserver?.disconnect();
@@ -106,6 +93,7 @@ export function installLightweightProfiler({ viewport, bridge, root }) {
         if (next === expensive) return expensive;
         expensive = next;
         stopExpensiveObservers();
+        bridge?.setTraceGeometry?.(expensive);
         if (!expensive || typeof PerformanceObserver === 'undefined') return expensive;
 
         try {
@@ -157,8 +145,14 @@ export function installLightweightProfiler({ viewport, bridge, root }) {
 
     function snapshot({ includeRuntimeStats = true } = {}) {
         const bridgeStats = bridge?.stats?.() ?? {};
-        const traceCount = Number(bridgeStats.traceCount);
-        if (Number.isFinite(traceCount)) counters.traceWrites = traceCount;
+        for (const key of [
+            'getContextCalls', 'bridgeContextCalls',
+            'releaseSweepSchedules', 'releaseSweepRuns',
+            'rAFSchedules', 'traceWrites', 'geometryTraceReads',
+        ]) {
+            const value = Number(bridgeStats[key]);
+            if (Number.isFinite(value)) counters[key] = value;
+        }
 
         return {
             capturedAt: Date.now(),
@@ -186,6 +180,7 @@ export function installLightweightProfiler({ viewport, bridge, root }) {
         markStatusRefresh,
         dispose() {
             stopExpensiveObservers();
+            bridge?.setTraceGeometry?.(false);
             for (const restore of originals.reverse()) restore();
             delete globalThis[PROFILE_MARK];
         },
