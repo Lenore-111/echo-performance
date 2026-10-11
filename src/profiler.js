@@ -14,22 +14,26 @@ export function installLightweightProfiler({ viewport, bridge, root }) {
     const counters = {
         getContextCalls: 0,
         bridgeContextCalls: 0,
-        mutationCallbacks: null,
-        mutationRecords: null,
+        mutationCallbacks: 0,
+        mutationRecords: 0,
         compactSchedules: 0,
         compactRuns: 0,
         compactDuration: 0,
         restoreRuns: 0,
         restoreDuration: 0,
-        releaseSweepSchedules: null,
-        releaseSweepRuns: null,
+        releaseSweepSchedules: 0,
+        releaseSweepRuns: 0,
         temporaryMounts: 0,
         traceWrites: 0,
-        geometryTraceReads: null,
+        geometryTraceReads: 0,
         statusRefreshes: 0,
         statusDomScans: 0,
-        rAFSchedules: null,
-        observerCallbacks: null,
+        rAFSchedules: 0,
+        observerCallbacks: 0,
+        intersectionObserverCallbacks: 0,
+        intersectionObserverEntries: 0,
+        resizeObserverCallbacks: 0,
+        resizeObserverEntries: 0,
         longTasks: 0,
         maxLongTask: 0,
         inputDelaySamples: [],
@@ -39,6 +43,26 @@ export function installLightweightProfiler({ viewport, bridge, root }) {
     let longTaskObserver = null;
     let eventObserver = null;
     const originals = [];
+    const bridgeCounterKeys = [
+        'getContextCalls', 'bridgeContextCalls',
+        'releaseSweepSchedules', 'releaseSweepRuns',
+        'rAFSchedules', 'traceWrites', 'geometryTraceReads',
+    ];
+    const viewportCounterKeys = [
+        'mutationCallbacks', 'mutationRecords',
+        'observerCallbacks',
+        'intersectionObserverCallbacks', 'intersectionObserverEntries',
+        'resizeObserverCallbacks', 'resizeObserverEntries',
+        'rAFSchedules',
+    ];
+    let bridgeBaseline = Object.create(null);
+    let viewportBaseline = Object.create(null);
+
+    const numericCounters = (source, keys) => Object.fromEntries(keys.map(key => [key, finite(Number(source?.[key]))]));
+    const refreshBaselines = () => {
+        bridgeBaseline = numericCounters(bridge?.stats?.() ?? {}, bridgeCounterKeys);
+        viewportBaseline = numericCounters(viewport?.performanceStats?.() ?? {}, viewportCounterKeys);
+    };
 
     const wrap = (object, key, wrapper) => {
         const original = object?.[key];
@@ -139,19 +163,27 @@ export function installLightweightProfiler({ viewport, bridge, root }) {
     function reset() {
         for (const key of Object.keys(counters)) {
             if (Array.isArray(counters[key])) counters[key] = [];
-            else if (counters[key] !== null) counters[key] = 0;
+            else counters[key] = 0;
         }
+        refreshBaselines();
     }
 
-    function snapshot({ includeRuntimeStats = true } = {}) {
+    function snapshot({ includeRuntimeStats = true, includeDomScan = false } = {}) {
         const bridgeStats = bridge?.stats?.() ?? {};
-        for (const key of [
-            'getContextCalls', 'bridgeContextCalls',
-            'releaseSweepSchedules', 'releaseSweepRuns',
-            'rAFSchedules', 'traceWrites', 'geometryTraceReads',
-        ]) {
+        const viewportStats = viewport?.performanceStats?.() ?? {};
+        for (const key of bridgeCounterKeys) {
             const value = Number(bridgeStats[key]);
-            if (Number.isFinite(value)) counters[key] = value;
+            if (!Number.isFinite(value)) continue;
+            const delta = Math.max(0, value - finite(bridgeBaseline[key]));
+            if (key === 'rAFSchedules') counters.rAFSchedules = delta;
+            else counters[key] = delta;
+        }
+        for (const key of viewportCounterKeys) {
+            const value = Number(viewportStats[key]);
+            if (!Number.isFinite(value)) continue;
+            const delta = Math.max(0, value - finite(viewportBaseline[key]));
+            if (key === 'rAFSchedules') counters.rAFSchedules += delta;
+            else counters[key] = delta;
         }
 
         return {
@@ -159,19 +191,21 @@ export function installLightweightProfiler({ viewport, bridge, root }) {
             expensiveInstrumentation: expensive,
             counters: clone(counters),
             runtime: includeRuntimeStats ? {
-                viewport: viewport?.stats?.() ?? null,
+                viewport: viewport?.stats?.({ includeDomScan }) ?? null,
                 bridge: bridgeStats,
                 heapUsed: performance?.memory?.usedJSHeapSize ?? null,
                 heapTotal: performance?.memory?.totalJSHeapSize ?? null,
                 rootChildCount: root?.children?.length ?? null,
             } : null,
             notes: {
-                nullCounters: 'Counters reported as null require internal hook instrumentation and are intentionally not approximated by global monkey-patching.',
                 inputDelay: 'Event Timing collection is disabled by default and only starts after setExpensive(true).',
-                runtimeStats: 'viewport.stats() performs DOM scans; profile() is an explicit diagnostic path, not a production hot path.',
+                runtimeStats: 'profile() uses cheap viewport stats by default. Pass { includeDomScan: true } only when the full live element count is explicitly required.',
+                resetSemantics: 'Bridge and viewport counters are reported as deltas from the most recent profileReset(), so reset does not require mutating runtime-owned counters.',
             },
         };
     }
+
+    refreshBaselines();
 
     const api = Object.freeze({
         snapshot,
