@@ -37,6 +37,7 @@ export class DomCompactor {
         this.messageToChunk = new Map();
         this.pinned = new WeakSet();
         this.compactTimer = null;
+        this.compactDeadline = 0;
         this.compactFrame = null;
         this.buildTimer = null;
         this.observingMutations = false;
@@ -83,6 +84,7 @@ export class DomCompactor {
             this.performanceCounters.observerCallbacks += 1;
             if (this.internalMutation || !this.enabled) return;
             let directStructureChanged = false;
+            let trackedChunkChanged = false;
             for (const record of records) {
                 if (record.target === this.root && record.type === 'childList') directStructureChanged = true;
                 const target = record.target instanceof Element ? record.target : record.target.parentElement;
@@ -90,10 +92,16 @@ export class DomCompactor {
                 if (!shell) continue;
                 const id = numericMesId(shell);
                 const chunk = id === null ? null : this.messageToChunk.get(id);
-                if (chunk) chunk.dirty = true;
+                if (chunk) {
+                    chunk.dirty = true;
+                    trackedChunkChanged = true;
+                }
             }
             if (directStructureChanged && !this.generating) this.scheduleBuild();
-            this.scheduleCompact();
+            // Ignore character/style churn inside untracked hot messages. Dynamic
+            // status blocks and theme widgets can mutate frequently without changing
+            // any cold chunk, so waking compaction for those updates only adds jank.
+            if (directStructureChanged || trackedChunkChanged) this.scheduleCompact();
         });
 
         this.resize = new ResizeObserver(entries => {
@@ -234,16 +242,36 @@ export class DomCompactor {
 
     scheduleCompact(delay = COMPACT_DELAY_MS) {
         if (!this.enabled || this.paused || this.generating) return;
-        clearTimeout(this.compactTimer);
-        this.compactTimer = setTimeout(() => {
+        const wait = Math.max(0, Number(delay) || 0);
+        const requestedDeadline = performance.now() + wait;
+        if (!this.compactDeadline || wait === 0) this.compactDeadline = requestedDeadline;
+        else this.compactDeadline = Math.max(this.compactDeadline, requestedDeadline);
+
+        const runWhenDue = () => {
+            const remaining = this.compactDeadline - performance.now();
+            if (remaining > 4) {
+                this.compactTimer = setTimeout(runWhenDue, remaining);
+                return;
+            }
             this.compactTimer = null;
+            this.compactDeadline = 0;
+            if (!this.enabled || this.paused || this.generating) return;
             if (this.compactFrame) cancelAnimationFrame(this.compactFrame);
             this.performanceCounters.rAFSchedules += 1;
             this.compactFrame = requestAnimationFrame(() => {
                 this.compactFrame = null;
                 this.compactFarChunks();
             });
-        }, delay);
+        };
+
+        if (this.compactTimer !== null) {
+            // Normal scroll/mutation traffic only extends the trailing deadline.
+            // An explicit zero-delay request still preempts the pending timer.
+            if (wait !== 0) return;
+            clearTimeout(this.compactTimer);
+            this.compactTimer = null;
+        }
+        this.compactTimer = setTimeout(runWhenDue, Math.max(0, this.compactDeadline - performance.now()));
     }
 
     cancelScheduledWork() {
@@ -251,6 +279,7 @@ export class DomCompactor {
         clearTimeout(this.buildTimer);
         if (this.compactFrame) cancelAnimationFrame(this.compactFrame);
         this.compactTimer = null;
+        this.compactDeadline = 0;
         this.buildTimer = null;
         this.compactFrame = null;
     }
