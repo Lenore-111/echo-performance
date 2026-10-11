@@ -5,6 +5,9 @@ const EVICT_MARGIN_PX = 2600;
 const COMPACT_DELAY_MS = 180;
 const INTERACTION_PIN_MS = 1800;
 const MAX_RESTORE_SAMPLES = 80;
+const DEEP_COLD_MIN_MESSAGES = 300;
+const RETAINED_DETACHED_DOM_CHUNKS = 3;
+const DEEP_COLD_IDLE_TIMEOUT_MS = 1000;
 const MUTATION_OPTIONS = { childList: true, subtree: true, characterData: true };
 
 function numericMesId(element) {
@@ -40,6 +43,10 @@ export class DomCompactor {
         this.compactDeadline = 0;
         this.compactFrame = null;
         this.buildTimer = null;
+        this.deepColdHandle = null;
+        this.deepColdHandleKind = null;
+        this.deepColdSerializedBytes = 0;
+        this.onChunkHydrated = null;
         this.observingMutations = false;
         this.observingResize = false;
         this.internalMutation = false;
@@ -58,6 +65,8 @@ export class DomCompactor {
             resizeObserverEntries: 0,
             observerCallbacks: 0,
             rAFSchedules: 0,
+            deepColdFreezes: 0,
+            deepColdHydrations: 0,
         };
 
         this.placeholderObserver = new IntersectionObserver(entries => {
@@ -111,8 +120,14 @@ export class DomCompactor {
             const width = this.root.clientWidth;
             if (!this.enabled || !width || Math.abs(width - this.width) < 1) return;
             this.width = width;
-            // Cached placeholder heights are width-dependent. Rebuild from the
-            // original nodes instead of guessing new wrapped text heights.
+            // Do not eagerly hydrate every serialized historical chunk on a simple
+            // width change. Deep-cold placeholder heights may be slightly stale
+            // until that chunk is restored, where scroll anchoring corrects drift.
+            if (this.chunks.some(chunk => chunk.deepCold)) {
+                this.scheduleCompact(0);
+                this.onStateChange?.();
+                return;
+            }
             this.rebuildFromLiveDom('resize');
         });
         this.onScroll = () => {
@@ -278,10 +293,16 @@ export class DomCompactor {
         clearTimeout(this.compactTimer);
         clearTimeout(this.buildTimer);
         if (this.compactFrame) cancelAnimationFrame(this.compactFrame);
+        if (this.deepColdHandle !== null) {
+            if (this.deepColdHandleKind === 'idle' && typeof cancelIdleCallback === 'function') cancelIdleCallback(this.deepColdHandle);
+            else clearTimeout(this.deepColdHandle);
+        }
         this.compactTimer = null;
         this.compactDeadline = 0;
         this.buildTimer = null;
         this.compactFrame = null;
+        this.deepColdHandle = null;
+        this.deepColdHandleKind = null;
     }
 
     connectMutationObserver() {
@@ -386,8 +407,12 @@ export class DomCompactor {
             id: ++this.chunkSerial,
             startId: Math.min(...ids),
             endId: Math.max(...ids),
+            messageIds: [...ids],
             nodes: [...nodes],
             fragment: document.createDocumentFragment(),
+            serializedNodes: null,
+            serializedBytes: 0,
+            deepCold: false,
             placeholder: null,
             height: 0,
             mounted: true,
@@ -444,6 +469,83 @@ export class DomCompactor {
             for (const [chunk, height] of measurements) this.detachChunkInternal(chunk, height);
         }), { type: 'compact', reason, range: [candidates[0].startId, candidates.at(-1).endId] });
         this.lastCompactDurationMs = performance.now() - started;
+        this.scheduleDeepColdTrim();
+    }
+
+    deepColdCandidates() {
+        const context = this.getContext();
+        if (!this.enabled || this.paused || this.generating || context.chat.length < DEEP_COLD_MIN_MESSAGES) return [];
+        const detached = this.chunks
+            .filter(chunk => !chunk.mounted && !chunk.deepCold && chunk.nodes.length)
+            .sort((a, b) => b.endId - a.endId);
+        return detached.slice(RETAINED_DETACHED_DOM_CHUNKS).reverse();
+    }
+
+    canDeepFreezeChunk(chunk) {
+        if (!chunk || chunk.mounted || chunk.deepCold || !chunk.nodes.length) return false;
+        return !chunk.nodes.some(node =>
+            node.hasAttribute?.('data-echo-no-deep-cold')
+            || node.querySelector?.('iframe, video, audio, canvas, textarea, input, select, [contenteditable="true"]')
+        );
+    }
+
+    deepFreezeChunk(chunk) {
+        if (!this.canDeepFreezeChunk(chunk)) return false;
+        const serialized = chunk.nodes.map(node => node.outerHTML);
+        const bytes = serialized.reduce((sum, html) => sum + html.length * 2, 0);
+        chunk.serializedNodes = serialized;
+        chunk.serializedBytes = bytes;
+        chunk.deepCold = true;
+        chunk.nodes = [];
+        chunk.fragment = document.createDocumentFragment();
+        this.deepColdSerializedBytes += bytes;
+        this.performanceCounters.deepColdFreezes += 1;
+        return true;
+    }
+
+    scheduleDeepColdTrim() {
+        if (this.deepColdHandle !== null || !this.deepColdCandidates().length) return;
+        const run = () => {
+            this.deepColdHandle = null;
+            this.deepColdHandleKind = null;
+            if (!this.enabled || this.paused || this.generating) return;
+            const chunk = this.deepColdCandidates()[0];
+            if (chunk) this.deepFreezeChunk(chunk);
+            if (this.deepColdCandidates().length) this.scheduleDeepColdTrim();
+            this.onStateChange?.();
+        };
+        if (typeof requestIdleCallback === 'function') {
+            this.deepColdHandleKind = 'idle';
+            this.deepColdHandle = requestIdleCallback(run, { timeout: DEEP_COLD_IDLE_TIMEOUT_MS });
+        } else {
+            this.deepColdHandleKind = 'timeout';
+            this.deepColdHandle = setTimeout(run, 60);
+        }
+    }
+
+    hydrateChunk(chunk) {
+        if (!chunk?.deepCold) return true;
+        const serialized = Array.isArray(chunk.serializedNodes) ? chunk.serializedNodes : [];
+        const nodes = [];
+        const fragment = document.createDocumentFragment();
+        for (const html of serialized) {
+            const template = document.createElement('template');
+            template.innerHTML = html.trim();
+            const node = template.content.firstElementChild;
+            if (!(node instanceof HTMLElement)) return false;
+            nodes.push(node);
+            fragment.append(node);
+        }
+        if (nodes.length !== chunk.messageIds.length) return false;
+        this.deepColdSerializedBytes = Math.max(0, this.deepColdSerializedBytes - Number(chunk.serializedBytes || 0));
+        chunk.nodes = nodes;
+        chunk.fragment = fragment;
+        chunk.serializedNodes = null;
+        chunk.serializedBytes = 0;
+        chunk.deepCold = false;
+        this.performanceCounters.deepColdHydrations += 1;
+        this.onChunkHydrated?.(chunk);
+        return true;
     }
 
     canCompactChunk(chunk) {
@@ -502,6 +604,7 @@ export class DomCompactor {
 
     restoreChunkInternal(chunk) {
         if (!chunk || chunk.mounted) return;
+        if (chunk.deepCold && !this.hydrateChunk(chunk)) return;
         if (chunk.placeholder) this.placeholderObserver.unobserve(chunk.placeholder);
         const insertionPoint = chunk.placeholder?.parentElement === this.root
             ? chunk.placeholder
@@ -638,6 +741,7 @@ export class DomCompactor {
         for (const placeholder of this.root.querySelectorAll(':scope > .echo-dom-chunk-placeholder')) placeholder.remove();
         this.chunks = [];
         this.messageToChunk.clear();
+        this.deepColdSerializedBytes = 0;
     }
 
     discardDetachedState() {
@@ -649,6 +753,7 @@ export class DomCompactor {
         this.chunks = [];
         this.messageToChunk.clear();
         this.restoreSamples = [];
+        this.deepColdSerializedBytes = 0;
     }
 
     rebuildFromLiveDom(reason = 'rebuild') {
@@ -668,7 +773,8 @@ export class DomCompactor {
             }
             if (chunk.placeholder) this.placeholderObserver.unobserve(chunk.placeholder);
             if (chunk.placeholder?.parentElement === this.root) chunk.placeholder.remove();
-            for (const node of chunk.nodes) this.messageToChunk.delete(numericMesId(node));
+            for (const id of chunk.messageIds ?? []) this.messageToChunk.delete(id);
+            if (chunk.deepCold) this.deepColdSerializedBytes = Math.max(0, this.deepColdSerializedBytes - Number(chunk.serializedBytes || 0));
         }
         this.chunks = keep;
     }
@@ -688,8 +794,10 @@ export class DomCompactor {
 
     stats({ includeDomScan = true } = {}) {
         const liveMessages = directMessages(this.root).length;
-        const detachedMessages = this.chunks.reduce((count, chunk) => count + (chunk.mounted ? 0 : chunk.nodes.length), 0);
-        const mountedColdMessages = this.chunks.reduce((count, chunk) => count + (chunk.mounted ? chunk.nodes.length : 0), 0);
+        const detachedMessages = this.chunks.reduce((count, chunk) => count + (chunk.mounted ? 0 : (chunk.messageIds?.length ?? chunk.nodes.length)), 0);
+        const mountedColdMessages = this.chunks.reduce((count, chunk) => count + (chunk.mounted ? (chunk.messageIds?.length ?? chunk.nodes.length) : 0), 0);
+        const deepColdMessages = this.chunks.reduce((count, chunk) => count + (chunk.deepCold ? (chunk.messageIds?.length ?? 0) : 0), 0);
+        const retainedDetachedDomMessages = this.chunks.reduce((count, chunk) => count + (!chunk.mounted && !chunk.deepCold ? chunk.nodes.length : 0), 0);
         return {
             enabled: this.enabled,
             paused: this.paused,
@@ -702,6 +810,10 @@ export class DomCompactor {
             chunkCount: this.chunks.length,
             detachedChunks: this.chunks.filter(chunk => !chunk.mounted).length,
             mountedColdChunks: this.chunks.filter(chunk => chunk.mounted).length,
+            deepColdChunks: this.chunks.filter(chunk => chunk.deepCold).length,
+            deepColdMessageShells: deepColdMessages,
+            retainedDetachedDomMessages,
+            deepColdSerializedBytes: this.deepColdSerializedBytes,
             placeholderCount: this.root.querySelectorAll(':scope > .echo-dom-chunk-placeholder').length,
             liveChatElements: includeDomScan ? this.root.querySelectorAll('*').length : null,
             performanceCounters: this.performanceStats(),

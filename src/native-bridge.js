@@ -556,6 +556,8 @@ export function installNativeColdBridge(viewport, nativeGetContext) {
         for (const shell of root.querySelectorAll(':scope > .mes')) attachShell(shell);
     }
 
+    viewport.onChunkHydrated = () => queueMicrotask(attachCurrent);
+
     async function finalizeJump(target) {
         const chunk = chunkFor(target);
         pushTrace('jump-finalize-started', { mesId: Number(target), chunk, reason: 'native-chat-jump' });
