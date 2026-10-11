@@ -550,6 +550,7 @@ export function installNativeColdBridge(viewport, nativeGetContext) {
     }
 
     function attachCurrent() {
+        if (!viewport.enabled || viewport.paused) return;
         const root = viewport.root instanceof HTMLElement ? viewport.root : document.querySelector('#chat');
         if (!(root instanceof HTMLElement)) return;
         for (const shell of root.querySelectorAll(':scope > .mes')) attachShell(shell);
@@ -591,6 +592,9 @@ export function installNativeColdBridge(viewport, nativeGetContext) {
 
             const originalCallback = command.callback;
             command.callback = async function (args, index) {
+                if (!viewport.enabled || viewport.paused) {
+                    return Reflect.apply(originalCallback, this, [args, index]);
+                }
                 const target = commandTarget(index);
                 if (target !== null) {
                     beginOperation(target, 'native-chat-jump-command');
@@ -719,6 +723,7 @@ export function installNativeColdBridge(viewport, nativeGetContext) {
     }
 
     const onChatInput = event => {
+        if (!viewport.enabled || viewport.paused) return;
         const input = event.target;
         if (!(input instanceof HTMLTextAreaElement) || input.id !== 'send_textarea') return;
         const target = extractChatJumpTarget(input.value);
@@ -733,7 +738,10 @@ export function installNativeColdBridge(viewport, nativeGetContext) {
     };
     document.addEventListener('input', onChatInput, true);
 
-    const onReleaseRelevantEvent = () => scheduleReleaseSweep();
+    const onReleaseRelevantEvent = () => {
+        if (!temporaryMounts.size) return;
+        scheduleReleaseSweep();
+    };
     for (const name of ['click', 'focusin', 'focusout', 'keyup', 'toggle']) {
         document.addEventListener(name, onReleaseRelevantEvent, true);
     }
@@ -741,8 +749,10 @@ export function installNativeColdBridge(viewport, nativeGetContext) {
 
     const bridgedGetContext = () => {
         bridgeStats.getContextCalls += 1;
+        const context = nativeGetContext();
+        if (!viewport.enabled || viewport.paused) return context;
         bridgeStats.bridgeContextCalls += 1;
-        return bridgeContext(nativeGetContext());
+        return bridgeContext(context);
     };
     globalThis.SillyTavern.getContext = bridgedGetContext;
 

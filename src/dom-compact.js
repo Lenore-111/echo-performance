@@ -40,6 +40,7 @@ export class DomCompactor {
         this.compactFrame = null;
         this.buildTimer = null;
         this.observingMutations = false;
+        this.observingResize = false;
         this.internalMutation = false;
         this.chunkSerial = 0;
         this.lastCompactDurationMs = 0;
@@ -106,12 +107,14 @@ export class DomCompactor {
             // original nodes instead of guessing new wrapped text heights.
             this.rebuildFromLiveDom('resize');
         });
-        this.resize.observe(root);
-
-        this.onScroll = () => this.scheduleCompact();
+        this.onScroll = () => {
+            if (!this.enabled || this.paused || this.generating) return;
+            this.scheduleCompact();
+        };
         this.root.addEventListener('scroll', this.onScroll, { passive: true });
 
         this.beforeInteraction = event => {
+            if (!this.enabled || this.paused || this.generating) return;
             const shell = event.target instanceof Element ? event.target.closest('#chat > .mes') : null;
             if (!shell) return;
             const id = numericMesId(shell);
@@ -137,11 +140,13 @@ export class DomCompactor {
         if (!this.enabled) {
             this.restoreAll({ clear: true, reason: 'disabled' });
             this.disconnectMutationObserver();
+            this.disconnectResizeObserver();
             this.cancelScheduledWork();
             this.onStateChange?.();
             return;
         }
         this.connectMutationObserver();
+        this.connectResizeObserver();
         this.scheduleBuild(0);
         this.onStateChange?.();
     }
@@ -150,6 +155,8 @@ export class DomCompactor {
         if (!this.enabled) return;
         this.paused = true;
         this.restoreAll({ clear: false, reason: 'manual-pause' });
+        this.disconnectMutationObserver();
+        this.disconnectResizeObserver();
         this.cancelScheduledWork();
         this.onStateChange?.();
     }
@@ -157,6 +164,8 @@ export class DomCompactor {
     resume() {
         if (!this.enabled) return;
         this.paused = false;
+        this.connectMutationObserver();
+        this.connectResizeObserver();
         this.scheduleBuild(0);
         this.scheduleCompact();
         this.onStateChange?.();
@@ -165,6 +174,8 @@ export class DomCompactor {
     generationStarted() {
         if (!this.enabled) return;
         this.generating = true;
+        this.disconnectMutationObserver();
+        this.disconnectResizeObserver();
         this.cancelScheduledWork();
         const context = this.getContext();
         if (context.chat.length) this.ensureMessageMounted(context.chat.length - 1, { reason: 'generation-start' });
@@ -174,6 +185,8 @@ export class DomCompactor {
     generationEnded() {
         if (!this.enabled) return;
         this.generating = false;
+        this.connectMutationObserver();
+        this.connectResizeObserver();
         this.scheduleBuild(0);
         this.scheduleCompact();
         this.onStateChange?.();
@@ -253,6 +266,17 @@ export class DomCompactor {
         this.observingMutations = false;
     }
 
+    connectResizeObserver() {
+        if (this.observingResize || !this.enabled || this.paused || this.generating) return;
+        this.resize.observe(this.root);
+        this.observingResize = true;
+    }
+
+    disconnectResizeObserver() {
+        this.resize.disconnect();
+        this.observingResize = false;
+    }
+
     withMutationSilenced(fn) {
         const reconnect = this.observingMutations;
         if (reconnect) this.disconnectMutationObserver();
@@ -261,7 +285,7 @@ export class DomCompactor {
             return fn();
         } finally {
             this.internalMutation = false;
-            if (reconnect && this.enabled) this.connectMutationObserver();
+            if (reconnect && this.enabled && !this.paused && !this.generating) this.connectMutationObserver();
         }
     }
 

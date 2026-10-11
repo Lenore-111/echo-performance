@@ -86,7 +86,10 @@ function start() {
 
     const setEnabled = (enabled, persist = false) => {
         viewport.setEnabled(enabled);
-        bridge.attachCurrent();
+        // Let the zero-delay cold-chunk build run first. Attaching bridge listeners
+        // after compaction avoids synchronously walking a 500/1000-message chat
+        // during the user's enable click.
+        if (viewport.enabled) setTimeout(() => bridge.attachCurrent(), 0);
         checkbox.checked = viewport.enabled;
         if (persist) {
             settings.enabled = viewport.enabled;
